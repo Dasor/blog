@@ -205,7 +205,7 @@ params:
         companyUrl: "https://cambridgesciencepark.co.uk/directory/huawei-uk-research-centre/"
         jobs:
           - name: "Compiler Engineer Intern"
-            date: "July 2023 - September 2025"
+            date: "July 2025 - September 2025"
             content: "I worked as an intern thanks to the OSPP program with the team at Huawei Cambridge where the goal was to enable SVE/SME lowering into triton-cpu"
             featuredItems:
               fontAwesomeIcons:
