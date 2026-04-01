@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogs on Daniel&#39;s blog</title>
+    <link>http://localhost:1313/blogs/</link>
+    <description>Recent content in Blogs on Daniel&#39;s blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 01 Apr 2026 11:12:03 +0200</lastBuildDate>
+    <atom:link href="http://localhost:1313/blogs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Why you should Root your phone (and other things)</title>
+      <link>http://localhost:1313/blogs/rooting/</link>
+      <pubDate>Wed, 01 Apr 2026 11:12:03 +0200</pubDate>
+      <guid>http://localhost:1313/blogs/rooting/</guid>
+      <description>&lt;h2 id=&#34;what-is-rooting&#34;&gt;What is rooting?&lt;/h2&gt;&#xA;&lt;p&gt;If you know what rooting is, you can safely skip this section. I will just briefly explain in simple terms what rooting is. If you kept reading I guess you are not much of a power user so let me give you an example using Windows as an analogy. I&amp;rsquo;m sure at some point you have needed to use the option in Windows that says &amp;ldquo;Run as an Administrator&amp;rdquo; perhaps to install software or for other various purposes.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

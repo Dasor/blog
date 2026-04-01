@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on Hugo Profile</title>
+    <link>http://localhost:1313/es/tags/</link>
+    <description>Recent content in Tags on Hugo Profile</description>
+    <generator>Hugo</generator>
+    <language>es</language>
+    <lastBuildDate>Fri, 09 Dec 2022 19:53:33 +0530</lastBuildDate>
+    <atom:link href="http://localhost:1313/es/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Ejemplo</title>
+      <link>http://localhost:1313/es/tags/ejemplo/</link>
+      <pubDate>Fri, 09 Dec 2022 19:53:33 +0530</pubDate>
+      <guid>http://localhost:1313/es/tags/ejemplo/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Mathjax</title>
+      <link>http://localhost:1313/es/tags/mathjax/</link>
+      <pubDate>Fri, 09 Dec 2022 19:53:33 +0530</pubDate>
+      <guid>http://localhost:1313/es/tags/mathjax/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Sintaxis De Markdown</title>
+      <link>http://localhost:1313/es/tags/sintaxis-de-markdown/</link>
+      <pubDate>Fri, 09 Dec 2022 19:53:33 +0530</pubDate>
+      <guid>http://localhost:1313/es/tags/sintaxis-de-markdown/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Muestra</title>
+      <link>http://localhost:1313/es/tags/muestra/</link>
+      <pubDate>Sat, 03 Apr 2021 23:29:21 +0530</pubDate>
+      <guid>http://localhost:1313/es/tags/muestra/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Soporte De Emoji</title>
+      <link>http://localhost:1313/es/tags/soporte-de-emoji/</link>
+      <pubDate>Sat, 03 Apr 2021 22:53:58 +0530</pubDate>
+      <guid>http://localhost:1313/es/tags/soporte-de-emoji/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Texto De Relleno</title>
+      <link>http://localhost:1313/es/tags/texto-de-relleno/</link>
+      <pubDate>Sat, 03 Apr 2021 22:41:10 +0530</pubDate>
+      <guid>http://localhost:1313/es/tags/texto-de-relleno/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Contenido Enriquecido</title>
+      <link>http://localhost:1313/es/tags/contenido-enriquecido/</link>
+      <pubDate>Sat, 03 Apr 2021 19:53:33 +0530</pubDate>
+      <guid>http://localhost:1313/es/tags/contenido-enriquecido/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

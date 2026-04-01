@@ -1,0 +1,35 @@
+{{ define "head" }}
+<meta name="description" content="{{ .Params.description }}">
+<link rel="stylesheet" href="{{ (printf "%scss/single.css" (.Site.Params.staticPath | default "")) | relURL }}">
+
+<!-- fontawesome -->
+<script defer src="{{ (printf "%sfontawesome-6/all-6.4.2.js" (.Site.Params.staticPath | default "")) | relURL }}"></script>
+{{ end }}
+
+{{ define "title" }}
+{{.Title }} | {{ .Site.Title }}
+{{ end }}
+
+{{ define "main" }}
+<section id="single">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-12 col-lg-9">
+        <div class="pr-lg-4">
+          <div class="title mb-5">
+            <h1 class="text-center mb-4"><i class="fab fa-monero"></i> {{ .Title }}</h1>
+          </div>
+          {{ if .Params.image }}
+          <div class="featured-image">
+            <img class="img-fluid mx-auto d-block" src="{{ .Params.image }}" alt="{{ .Title }}">
+          </div>
+          {{ end }}
+          <article class="page-content p-2">
+          {{ .Content | emojify }}
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{{ end }}

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Accept-CH" content="DPR, Viewport-Width, Width">
+<link rel="icon" href="https://avatars.githubusercontent.com/u/36473771?v=4" type="image/gif">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      media="print" onload="this.media='all'" />
+<noscript>
+  <link
+          href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+          rel="stylesheet">
+</noscript>
+
+
+<link rel="stylesheet" href="/css/font.css" media="all">
+
+
+
+<meta property="og:url" content="http://localhost:1313/blogs/rooting/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="Why you should Root your phone (and other things)">
+  <meta property="og:description" content="What is rooting? If you know what rooting is, you can safely skip this section. I will just briefly explain in simple terms what rooting is. If you kept reading I guess you are not much of a power user so let me give you an example using Windows as an analogy. I’m sure at some point you have needed to use the option in Windows that says “Run as an Administrator” perhaps to install software or for other various purposes.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blogs">
+    <meta property="article:published_time" content="2026-04-01T11:12:03+02:00">
+    <meta property="article:modified_time" content="2026-04-01T11:12:03+02:00">
+    <meta property="article:tag" content="Example">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Why you should Root your phone (and other things)">
+  <meta name="twitter:description" content="What is rooting? If you know what rooting is, you can safely skip this section. I will just briefly explain in simple terms what rooting is. If you kept reading I guess you are not much of a power user so let me give you an example using Windows as an analogy. I’m sure at some point you have needed to use the option in Windows that says “Run as an Administrator” perhaps to install software or for other various purposes.">
+
+
+
+
+
+<link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css" media="all"><link rel="stylesheet" href="/css/header.css" media="all">
+<link rel="stylesheet" href="/css/language-switcher.css" media="all">
+<link rel="stylesheet" href="/css/footer.css" media="all">
+
+
+<link rel="stylesheet" href="/css/theme.css" media="all">
+
+<style>
+    :root {
+        --text-color: #343a40;
+        --text-secondary-color: #6c757d;
+        --text-link-color: #007bff;
+        --background-color: #eaedf0;
+        --secondary-background-color: #64ffda1a;
+        --primary-color: #007bff;
+        --secondary-color: #f8f9fa;
+
+         
+        --text-color-dark: #e4e6eb;
+        --text-secondary-color-dark: #b0b3b8;
+        --text-link-color-dark: #ffffff;
+        --background-color-dark: #18191a;
+        --secondary-background-color-dark: #212529;
+        --primary-color-dark: #ffffff;
+        --secondary-color-dark: #212529;
+    }
+    body {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        text-align: left;
+    }
+
+    html {
+        background-color: var(--background-color) !important;
+    }
+
+    body::-webkit-scrollbar {
+        height: 0px;
+        width: 8px;
+        background-color: var(--background-color);
+    }
+
+    ::-webkit-scrollbar-track {
+        border-radius: 1rem;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 1rem;
+        background: #b0b0b0;
+        outline: 1px solid var(--background-color);
+    }
+
+    #search-content::-webkit-scrollbar {
+        width: .5em;
+        height: .1em;
+        background-color: var(--background-color);
+    }
+</style>
+
+
+
+<meta name="description" content="">
+<link rel="stylesheet" href="/css/single.css">
+
+
+<script defer src="/fontawesome-6/all-6.4.2.js"></script>
+
+
+  
+  
+
+  <title>
+Why you should Root your phone (and other things) | Daniel&#39;s blog
+
+  </title>
+</head>
+
+<body class="light">
+  
+  
+<script>
+    let localStorageValue = localStorage.getItem("pref-theme");
+    let mediaQuery = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    switch (localStorageValue) {
+        case "dark":
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+            break;
+        case "light":
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            break;
+        default:
+            if (mediaQuery) {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark');
+            }
+            break;
+    }
+</script>
+
+
+
+
+<script>
+    var prevScrollPos = window.pageYOffset;
+    window.addEventListener("scroll", function showHeaderOnScroll() {
+        let profileHeaderElem = document.getElementById("profileHeader");
+        let currentScrollPos = window.pageYOffset;
+        let resetHeaderStyle = false;
+        let showNavBarOnScrollUp =  true ;
+        let showNavBar = showNavBarOnScrollUp ? prevScrollPos > currentScrollPos : currentScrollPos > 0;
+        if (showNavBar) {
+            profileHeaderElem.classList.add("showHeaderOnTop");
+        } else {
+            resetHeaderStyle = true;
+        }
+        if(currentScrollPos === 0) {
+            resetHeaderStyle = true;
+        }
+        if(resetHeaderStyle) {
+            profileHeaderElem.classList.remove("showHeaderOnTop");
+        }
+        prevScrollPos = currentScrollPos;
+    });
+</script>
+
+
+
+<header id="profileHeader">
+    <nav class="pt-3 navbar navbar-expand-lg animate">
+        <div class="container-fluid mx-xs-2 mx-sm-5 mx-md-5 mx-lg-5">
+            
+            <a class="navbar-brand primary-font text-wrap" href="/">
+                
+                Daniel&#39;s Blog
+                
+            </a>
+
+            
+                <div>
+                    <input id="search" autocomplete="off" class="form-control mr-sm-2 d-none d-md-block" placeholder='Search...'
+                        aria-label="Search" oninput="searchOnChange(event)">
+                </div>
+            
+
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <svg aria-hidden="true" height="24" viewBox="0 0 16 16" version="1.1" width="24" data-view-component="true">
+                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
+                </svg>
+            </button>
+
+            
+            <div class="collapse navbar-collapse text-wrap primary-font" id="navbarContent">
+                <ul class="navbar-nav ms-auto text-center">
+                    
+                        <li class="nav-item navbar-text d-block d-md-none">
+                            <div class="nav-link">
+                                <input id="search" autocomplete="off" class="form-control mr-sm-2" placeholder='Search...' aria-label="Search" oninput="searchOnChange(event)">
+                            </div>
+                        </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#about" aria-label="about">
+                            About Me
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#experience"
+                            aria-label="experience">
+                            Experience
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#education"
+                            aria-label="education">
+                            Education
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#contact"
+                            aria-label="contact">
+                            Contact
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/blogs" title="Blog posts">
+                            
+                            Blog
+                        </a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/donations" title="Donations">
+                            
+                            Donations
+                        </a>
+                    </li>
+                    
+                    
+
+                    <li class="nav-item navbar-text">
+                        
+                        <div class="text-center">
+                            <button id="theme-toggle" type="button" aria-label="Toggle dark mode">
+                                <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                </svg>
+                                <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="5"></circle>
+                                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </li>
+                    
+
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+</header>
+<div id="content">
+<section id="single">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-12 col-lg-9">
+        <div class="pr-lg-4">
+          <div class="title mb-5">
+            <h1 class="text-center mb-4">Why you should Root your phone (and other things)</h1>
+            <div class="text-center">
+              
+                Daniel
+                <small>|</small>
+              
+              Apr 1, 2026
+
+              
+              <span id="readingTime">
+                min read
+              </span>
+              
+            </div>
+          </div>
+          
+          <div class="featured-image">
+            <img class="img-fluid mx-auto d-block" src="/images/rooting.png" alt="Why you should Root your phone (and other things)">
+          </div>
+          
+          <article class="page-content  p-2">
+          <h2 id="what-is-rooting">What is rooting?</h2>
+<p>If you know what rooting is, you can safely skip this section. I will just briefly explain in simple terms what rooting is. If you kept reading I guess you are not much of a power user so let me give you an example using Windows as an analogy. I&rsquo;m sure at some point you have needed to use the option in Windows that says &ldquo;Run as an Administrator&rdquo; perhaps to install software or for other various purposes.</p>
+<p>When you run as an administrator you have fewer limitations than when you run programs normally, that&rsquo;s why it is needed to install new software. In theory running as an administrator lets you do almost everything you want, even if that includes breaking your whole system, you are allowed to do as you please.</p>
+<p>The administrator user is called &ldquo;root&rdquo; in Linux and that&rsquo;s where the term rooting comes from. You may have never noticed as you can install new apps on your phone without too much hassle but, do you have administrator/root privileges in your phone?. Well let me tell you, you don&rsquo;t.</p>
+<p><strong>Rooting is the process in which we gain access to the root user</strong> so that we can become administrators of our own device as we are on our computers (sounds crazy right?).</p>
+<h2 id="reclaim-your-freedom">Reclaim your freedom</h2>
+<p>How can it be, that we buy something (in this case a smartphone) and we are not able to do as we please with it?. We are being stripped of our freedom. If you do not believe me just try now to uninstall the YouTube app, you can&rsquo;t. It&rsquo;s like buying a house but being unable to change the furniture, the walls and everything else.</p>
+<p>Rooting is reclaiming a little bit more of freedom for yourself, making you able to do what you want with what is yours.</p>
+<h3 id="freedom-vs-fitting-in-society">Freedom vs Fitting in society</h3>
+<p>Daily life is full of trade offs between your freedom and fitting into society, most of us have social media even if we know our data is brutally being sold without any care and we are being spied on. However rooting is an unfair tradeoff as you won&rsquo;t lose any acceptance in society and you will gain quite more freedom.</p>
+<p><img src="/images/freedom.png" alt="image"></p>
+<p>Regarding the figure above, most of us are probably &ldquo;Integrated&rdquo; and everyone has their own goals in life that require us to fit more or less into society (By the way I&rsquo;m not saying you should not be yourself to fit into society). But believe me, rooting will give you more freedom without any social cost.</p>
+<h2 id="knowledge-is-a-form-of-freedom-too">Knowledge is a form of freedom too</h2>
+<p>If you decide to root your phone you will learn so many things during the process. If you are already a computer nerd like me you will see a lot of parallelism between what you already know and what is required to root a phone. If you are not, you have even more things to learn!.</p>
+<p>Some people will say they do not want to learn, and that is a pity! (although somewhat understandable). Learning how a phone works is pretty useful, you would be learning about a device that is with you all the time and that you use for many, many things.</p>
+<p>It&rsquo;s even getting more important to learn now that some new laws about age verification at the operating system level are being pushed. If you want to maintain some privacy by not giving out your ID to your phone or computer which to me seems pretty normal, in the future you may need to know how those things work so you can bypass it. <strong>The less you know, the more manipulable you are</strong> and that is especially true with technology.</p>
+<p>Even if you are not sure about it, I would encourage you to pick an old Android phone you probably have lying around somewhere and try and root it just for the learning experience.</p>
+<h2 id="it-is-not-just-about-phones">It is not just about phones</h2>
+<p>I&rsquo;m talking about phones because they are the most widely used devices and used for lots of things but this mentality doesn&rsquo;t only apply to phones. Most computer systems are in the end just Linux systems but some like phones or videogame consoles are limited by the manufacturer. Even cars nowadays have lot of hardware and software that gets pretty annoying and restrictive.</p>
+<p>In more general terms learning how to &ldquo;hack&rdquo; these systems will give you a great amount of knowledge that can come in handy in other scenarios. The ability to understand how something truly works so you can change its behavior is one of the skills that separates normal computer scientists from top computer scientists. Below is a picture of a Nintendo 3DS running Linux</p>
+<img src="/images/3ds.jpg" width="800">
+<h2 id="what-can-a-rooted-device-do">What can a rooted device do.</h2>
+<p>When I get asked this question I always remember my early days learning Linux. My brother introduced me to Linux so I asked him a lot of things of what I could do with it and his response stuck with me. <strong>You can do anything as long as you know how</strong>. That may sound obvious but it&rsquo;s something you can&rsquo;t do with non-rooted devices, when a device is truly yours, your knowledge is the limit not some limitation imposed by the vendor.</p>
+<p>I also know that when I get asked this question people want <strong>practical things you can do</strong> with a rooted device. Once your device is rooted you can do things like:</p>
+<ul>
+<li>Record calls 📞 <cite><sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></cite></li>
+<li>Screenshot everything 📸 <cite><sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></cite></li>
+<li>Patch apps to remove ads or other content 🩹</li>
+<li>Delete unwanted apps (Like YouTube or Google) ❌</li>
+<li>Edit every configuration you want (like DNS in /etc/hosts) 👨‍💻</li>
+<li>Improve your privacy by deleting spyware 🔍</li>
+</ul>
+<p>To be more specific let me give you some concrete examples. Have you ever wanted to use Spotify or Youtube Music without ads and for free? <cite> you can do that<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> </cite>, Have you ever wanted to get rid of random google notifications that pop-up on your phone? you can do that too. Have you ever wanted to have Instagram to fit into society and message your friends but you don&rsquo;t want to see any reels or trash content? <cite>you can do that!<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup></cite>.</p>
+<h2 id="problems-that-come-with-a-rooted-device">Problems that come with a rooted device</h2>
+<p>However, I would be a fool if I told you rooting has only advantages. There is one main disadvantage that comes with rooting and it&rsquo;s <strong>apps that will stop working</strong> (don&rsquo;t worry there is a solution). Many apps are scared of rooted users, as we said before a root user can do virtually anything which may pose a security threat to some apps.</p>
+<p>Some apps will actively try and detect if your device is rooted and if it is they will forbid you from using them. Some examples of apps that do this are: Revolut, ChatGPT, McDonalds (I believe only in Europe), Google Wallet, etc. Google seems to hate rooted devices and makes it harder and harder to bypass these restrictions but they can get bypassed.</p>
+<p>If you are interested in how to bypass this because you want to use some app that doesn&rsquo;t work with root out of the box I recommend looking at <a href="https://xdaforums.com/">XDA Forums</a> which has very nice guides for android rooting and modding. These fixes are not permanent and you may need to look at them once in a while to keep everything working.</p>
+<p>Lastly, you may find official sources pointing out that rooting in insecure as if infected with malware it can even do worse things than It would normally do. In my opinion this is not a big issue, you should be careful with what you do, doesn&rsquo;t matter if the device is rooted or not. If you get infected with malware even if you have a normal device you still have a big problem.</p>
+<h2 id="rooting--custom-roms">Rooting &amp; custom ROMs</h2>
+<p>It&rsquo;s easy to get confused by these, some people have rooted phones, some people have custom ROMs and some people have both, let me explain what each means.</p>
+<p>Rooting, Is what we are talking about, getting access to the root user, it involves <strong>patching</strong> the operating system boot but not using a different operating system. For example you can still use the android version you have now and have a rooted phone.</p>
+<p><strong>A custom ROM is a modified operating system</strong>, they are also Android based but they differ in many aspects from the standard Android OS. The biggest focus of custom ROM&rsquo;s is freedom and privacy (a.k.a deleting as much google bloatware and spyware as possible). Getting a custom ROM involves not only changing the boot but the whole operating system also, the custom ROM must support the hardware model of your phone. Some popular custom ROM&rsquo;s are LineageOS and GrapheneOS.</p>
+<h2 id="ok-how-do-i-start">Ok, how do I start?</h2>
+<p>If you are interested in rooting your device, let me <strong>warn you about some things first⚠:</strong></p>
+<ul>
+<li>Rooting is only for Android, in iOS it would be jailbreaking and it&rsquo;s way more difficult and rarely seen.</li>
+<li>Not all devices are easy to root, Google&rsquo;s phones are pretty easy for instance, Chinese brands like Xiaomi are medium difficulty and other brands like Samsung are even harder.</li>
+<li>The harder it is to root the easier it is to brick your phone (permanently break it) for instance to brick a Google phone you really, really need to mess something up. On the other hand, I&rsquo;ve seen a couple of bricked Samsung&rsquo;s.</li>
+<li>In general not only when rooting but always you should follow this rule: <strong>Don&rsquo;t do something you don&rsquo;t understand</strong></li>
+</ul>
+<p>First you will need to unlock the bootloader, that is different for every manufacturer and will probably wipe your data the first time you do it. Then, for rooting you can use Magisk, KernelSU, Apatch or others; these are just tools that will patch your boot so you are able to access the root user.</p>
+<p>Magisk is the classical tool its been there for years meanwhile, KernelSU and Apatch are newer alternatives that are getting more popular as they make it easier to bypass the restrictions mentioned earlier.</p>
+<p>Once your phone is rooted, you can install modules developed by the community to do the things we said earlier. If you want to unlock the full potential of a rooted device you may want to take a look at LSposed.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>TLDR; Rooting is great, it lets you do anything with your phone (which you should be able to because you bought it) and you learn from the process. However, it can get tricky or if you do things wrong break your phone. But this is not just about phones. <strong>Go out there and reclaim what&rsquo;s yours, enjoy the learning and try and push the limits of what you know!</strong></p>
+<!---
+ CITATIONS
+-->
+<p><em>Disclaimer</em>: No AI was used to write the contents of this post, this is fully original and my own personal opinion.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>See <a href="https://github.com/chenxiaolong/BCR">BCR</a>&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>See <a href="https://github.com/VarunS2002/Xposed-Disable-FLAG_SECURE">Disable FLAG_SECURE</a>&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>See <a href="https://github.com/chsbuffer/RevancedXposed">Revanced Xposed</a>&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>See <a href="https://github.com/ReSo7200/InstaEclipse">InstaEclipse</a>&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+          </article>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-12 col-lg-3">
+        <div id="stickySideBar" class="sticky-sidebar">
+          
+          <aside class="toc">
+              <h5>
+                Table Of Contents
+              </h5>
+              <div class="toc-content">
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#what-is-rooting">What is rooting?</a></li>
+    <li><a href="#reclaim-your-freedom">Reclaim your freedom</a>
+      <ul>
+        <li><a href="#freedom-vs-fitting-in-society">Freedom vs Fitting in society</a></li>
+      </ul>
+    </li>
+    <li><a href="#knowledge-is-a-form-of-freedom-too">Knowledge is a form of freedom too</a></li>
+    <li><a href="#it-is-not-just-about-phones">It is not just about phones</a></li>
+    <li><a href="#what-can-a-rooted-device-do">What can a rooted device do.</a></li>
+    <li><a href="#problems-that-come-with-a-rooted-device">Problems that come with a rooted device</a></li>
+    <li><a href="#rooting--custom-roms">Rooting &amp; custom ROMs</a></li>
+    <li><a href="#ok-how-do-i-start">Ok, how do I start?</a></li>
+    <li><a href="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+              </div>
+          </aside>
+          
+
+          
+          <aside class="tags">
+            <h5>Tags</h5>
+            <ul class="tags-ul list-unstyled list-inline">
+              
+              
+              <li class="list-inline-item"><a href="/tags/example"
+                target="_blank"
+              >example</a></li>
+              
+            </ul>
+          </aside>
+          
+
+          
+          <aside class="social">
+            <h5>Social</h5>
+            <div class="social-content">
+              <ul class="list-inline">
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://www.linkedin.com/feed/?shareActive=true&text= http%3a%2f%2flocalhost%3a1313%2fblogs%2frooting%2f">
+                    <i class="fab fa-linkedin"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='https://twitter.com/share?text=Why%20you%20should%20Root%20your%20phone%20%28and%20other%20things%29&url=http%3a%2f%2flocalhost%3a1313%2fblogs%2frooting%2f&hashtags=example'>
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://api.whatsapp.com/send?text=Why%20you%20should%20Root%20your%20phone%20%28and%20other%20things%29: http%3a%2f%2flocalhost%3a1313%2fblogs%2frooting%2f">
+                    <i class="fab fa-whatsapp"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='mailto:?subject=Why%20you%20should%20Root%20your%20phone%20%28and%20other%20things%29&amp;body=Check%20out%20this%20site http%3a%2f%2flocalhost%3a1313%2fblogs%2frooting%2f'>
+                    <i class="fa fa-envelope"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </aside>
+          
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-12 col-lg-9 p-4">
+        
+      </div>
+    </div>
+  </div>
+  <button class="p-2 px-3" onclick="topFunction()" id="topScroll">
+    <i class="fas fa-angle-up"></i>
+  </button>
+</section>
+
+
+<div class="progress">
+  <div id="scroll-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+<Script src="/js/scrollProgressBar.js"></script>
+
+
+<script>
+  var topScroll = document.getElementById("topScroll");
+  window.onscroll = function() {scrollFunction()};
+
+  function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      topScroll.style.display = "block";
+    } else {
+      topScroll.style.display = "none";
+    }
+  }
+
+  function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }
+
+  
+  let stickySideBarElem = document.getElementById("stickySideBar");
+  let stickyNavBar =  true ;
+  if(stickyNavBar) {
+    let headerElem = document.getElementById("profileHeader");
+    let headerHeight = headerElem.offsetHeight + 15;
+    stickySideBarElem.style.top = headerHeight + "px";
+  } else {
+    stickySideBarElem.style.top = "50px";
+  }
+</script>
+
+
+<script src="/js/readingTime.js"></script>
+
+
+
+  </div><footer>
+    
+
+
+  
+
+ 
+ 
+<div class="container py-3" id="recent-posts">
+    
+    
+    <div class="h3 text-center text-secondary py-3">
+        Recent Posts
+    </div>
+    <div class="row justify-content-center">
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/rooting/">
+                        <img src="/images/rooting.png" class="card-img-top" alt="Why you should Root your phone (and other things)">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/rooting/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="Why you should Root your phone (and other things)">Why you should Root your …</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><h2 id="what-is-rooting">What is rooting?</h2>
+<p>If you know what rooting is, you can safely skip this section. I will just briefly explain in simple terms what rooting is. If you kept reading I guess you are not much of a power user so let me give you an example using Windows as an analogy. I&rsquo;m sure at some point you have …</p></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">April 1, 2026</span>
+                    <a href="/blogs/rooting/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<div class="text-center pt-2">
+    
+    <span class="px-1">
+        <a href="https://github.com/Dasor" target="_blank" aria-label="github">
+            <svg xmlns="http://www.w3.org/2000/svg" width="2.7em" height="2.7em" viewBox="0 0 1792 1792">
+                <path id="footer-socialNetworks-github-svg-path"
+                    d="M522 1352q-8 9-20-3-13-11-4-19 8-9 20 3 12 11 4 19zm-42-61q9 12 0 19-8 6-17-7t0-18q9-7 17 6zm-61-60q-5 7-13 2-10-5-7-12 3-5 13-2 10 5 7 12zm31 34q-6 7-16-3-9-11-2-16 6-6 16 3 9 11 2 16zm129 112q-4 12-19 6-17-4-13-15t19-7q16 5 13 16zm63 5q0 11-16 11-17 2-17-11 0-11 16-11 17-2 17 11zm58-10q2 10-14 14t-18-8 14-15q16-2 18 9zm964-956v960q0 119-84.5 203.5t-203.5 84.5h-224q-16 0-24.5-1t-19.5-5-16-14.5-5-27.5v-239q0-97-52-142 57-6 102.5-18t94-39 81-66.5 53-105 20.5-150.5q0-121-79-206 37-91-8-204-28-9-81 11t-92 44l-38 24q-93-26-192-26t-192 26q-16-11-42.5-27t-83.5-38.5-86-13.5q-44 113-7 204-79 85-79 206 0 85 20.5 150t52.5 105 80.5 67 94 39 102.5 18q-40 36-49 103-21 10-45 15t-57 5-65.5-21.5-55.5-62.5q-19-32-48.5-52t-49.5-24l-20-3q-21 0-29 4.5t-5 11.5 9 14 13 12l7 5q22 10 43.5 38t31.5 51l10 23q13 38 44 61.5t67 30 69.5 7 55.5-3.5l23-4q0 38 .5 103t.5 68q0 22-11 33.5t-22 13-33 1.5h-224q-119 0-203.5-84.5t-84.5-203.5v-960q0-119 84.5-203.5t203.5-84.5h960q119 0 203.5 84.5t84.5 203.5z" />
+
+                <metadata>
+                    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                        xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+                        <rdf:Description about="https://iconscout.com/legal#licenses"
+                            dc:title="Github, Online, Project, Hosting, Square"
+                            dc:description="Github, Online, Project, Hosting, Square" dc:publisher="Iconscout"
+                            dc:date="2016-12-14" dc:format="image/svg+xml" dc:language="en">
+                            <dc:creator>
+                                <rdf:Bag>
+                                    <rdf:li>Font Awesome</rdf:li>
+                                </rdf:Bag>
+                            </dc:creator>
+                        </rdf:Description>
+                    </rdf:RDF>
+                </metadata>
+            </svg>
+        </a>
+    </span>
+    
+
+    
+    <span class="px-1">
+        <a href="https://linkedin.com/in/dams2" target="_blank" aria-label="linkedin">
+            <svg xmlns="http://www.w3.org/2000/svg" width='2.4em' height='2.4em' fill="#fff" aria-label="LinkedIn"
+                viewBox="0 0 512 512">
+                <rect width="512" height="512" fill="#0077b5" rx="15%" />
+                <circle cx="142" cy="138" r="37" />
+                <path stroke="#fff" stroke-width="66" d="M244 194v198M142 194v198" />
+                <path d="M276 282c0-20 13-40 36-40 24 0 33 18 33 45v105h66V279c0-61-32-89-76-89-34 0-51 19-59 32" />
+            </svg>
+        </a>
+    </span>
+    
+
+    
+
+    
+
+    
+</div><div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-4 text-center">
+            
+                <div class="pb-2">
+                    <a href="http://localhost:1313/" title="Daniel&#39;s blog">
+                        <img alt="Footer logo" src="https://avatars.githubusercontent.com/u/36473771?v=4"
+                            height="40px" width="40px">
+                    </a>
+                </div>
+            
+            &copy; 2026  All rights reserved
+            <div class="text-secondary">
+                Made with
+                <span class="text-danger">
+                    &#10084;
+                </span>
+                and
+                <a href="https://github.com/gurusabarish/hugo-profile" target="_blank"
+                    title="Designed and developed by gurusabarish">
+                    Hugo Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</footer><script src="/bootstrap-5/js/bootstrap.bundle.min.js"></script>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+        document.documentElement.classList.remove('dark');
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    }
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            document.documentElement.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+</script>
+
+
+    <script>
+      
+      window.searchIndexURL = "/index.json";
+    </script>
+    <script src="/js/search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+  <section id="search-content" class="py-2">
+    <div class="container" id="search-results"></div>
+  </section>
+</body>
+
+</html>
