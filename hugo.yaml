@@ -164,7 +164,7 @@ params:
     socialLinks:
       fontAwesomeIcons:
         - icon: fab fa-github
-          url: https://example.com/Dasor
+          url: https://github.com/Dasor
         - icon: fab fa-linkedin
           url: https://linkedin.com/in/dams2
 
