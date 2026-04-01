@@ -4,7 +4,9 @@ draft: false
 author: "Daniel"
 title: 'Why you should Root your phone (and other things)'
 tags:
-  - example
+  - Hacking
+  - Low Level
+  - Android
 image: "/images/rooting.png"
 toc: true
 description: ""
