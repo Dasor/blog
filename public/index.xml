@@ -6,12 +6,12 @@
     <description>Recent content on Daniel&#39;s blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 01 Apr 2026 11:12:03 +0200</lastBuildDate>
+    <lastBuildDate>Sat, 30 May 2026 11:12:03 +0200</lastBuildDate>
     <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Optimizing CPU GEMM step by step.</title>
       <link>http://localhost:1313/blogs/cpu-gemm/</link>
-      <pubDate>Wed, 01 Apr 2026 11:12:03 +0200</pubDate>
+      <pubDate>Sat, 30 May 2026 11:12:03 +0200</pubDate>
       <guid>http://localhost:1313/blogs/cpu-gemm/</guid>
       <description>&lt;h2 id=&#34;introduction-what-is-gemm&#34;&gt;Introduction: What is GEMM?&lt;/h2&gt;&#xA;&lt;p&gt;Let&amp;rsquo;s first define what a GEMM is and why it is relevant in today&amp;rsquo;s world. GEMM refers to &lt;strong&gt;General Matrix Multiplication&lt;/strong&gt;, a linear algebra operation that can be defined as:&lt;/p&gt;&#xA;&lt;p&gt;$$ C = \alpha AB + \beta C $$&lt;/p&gt;&#xA;&lt;p&gt;Where A, B and C are matrices and alpha and beta are scalars. Most of the time the part we will focus on will be just A and B since multiplying two matrices is the biggest challenge.&lt;/p&gt;</description>
     </item>

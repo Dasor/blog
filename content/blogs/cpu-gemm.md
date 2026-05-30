@@ -1,5 +1,5 @@
 ---
-date: "2026-04-01T11:12:03+02:00"
+date: "2026-05-30T11:12:03+02:00"
 draft: false
 author: "Daniel"
 title: "Optimizing CPU GEMM step by step."
