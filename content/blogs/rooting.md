@@ -20,13 +20,13 @@ When you run as an administrator you have fewer limitations than when you run pr
 
 The administrator user is called "root" in Linux and that's where the term rooting comes from. You may have never noticed as you can install new apps on your phone without too much hassle but, do you have administrator/root privileges in your phone?. Well let me tell you, you don't.
 
-**Rooting is the process in which we gain access to the root user** so that we can become administrators of our own device as we are on our computers (sounds crazy right?). 
+**Rooting is the process in which we gain access to the root user** so that we can become administrators of our own device as we are on our computers (sounds crazy right?).
 
 ## Reclaim your freedom
 
 How can it be, that we buy something (in this case a smartphone) and we are not able to do as we please with it?. We are being stripped of our freedom. If you do not believe me just try now to uninstall the YouTube app, you can't. It's like buying a house but being unable to change the furniture, the walls and everything else.
 
-Rooting is reclaiming a little bit more of freedom for yourself, making you able to do what you want with what is yours. 
+Rooting is reclaiming a little bit more of freedom for yourself, making you able to do what you want with what is yours.
 
 ### Freedom vs Fitting in society
 
@@ -87,7 +87,7 @@ It's easy to get confused by these, some people have rooted phones, some people 
 
 Rooting, Is what we are talking about, getting access to the root user, it involves **patching** the operating system boot but not using a different operating system. For example you can still use the android version you have now and have a rooted phone.
 
-**A custom ROM is a modified operating system**, they are also Android based but they differ in many aspects from the standard Android OS. The biggest focus of custom ROM's is freedom and privacy (a.k.a deleting as much google bloatware and spyware as possible). Getting a custom ROM involves not only changing the boot but the whole operating system also, the custom ROM must support the hardware model of your phone. Some popular custom ROM's are LineageOS and GrapheneOS. 
+**A custom ROM is a modified operating system**, they are also Android based but they differ in many aspects from the standard Android OS. The biggest focus of custom ROM's is freedom and privacy (a.k.a deleting as much google bloatware and spyware as possible). Getting a custom ROM involves not only changing the boot but the whole operating system also, the custom ROM must support the hardware model of your phone. Some popular custom ROM's are LineageOS and GrapheneOS.
 
 ## Ok, how do I start?
 
@@ -96,7 +96,7 @@ If you are interested in rooting your device, let me **warn you about some thing
 * Rooting is only for Android, in iOS it would be jailbreaking and it's way more difficult and rarely seen.
 * Not all devices are easy to root, Google's phones are pretty easy for instance, Chinese brands like Xiaomi are medium difficulty and other brands like Samsung are even harder.
 * The harder it is to root the easier it is to brick your phone (permanently break it) for instance to brick a Google phone you really, really need to mess something up. On the other hand, I've seen a couple of bricked Samsung's.
-* In general not only when rooting but always you should follow this rule: **Don't do something you don't understand** 
+* In general not only when rooting but always you should follow this rule: **Don't do something you don't understand**
 
 First you will need to unlock the bootloader, that is different for every manufacturer and will probably wipe your data the first time you do it. Then, for rooting you can use Magisk, KernelSU, Apatch or others; these are just tools that will patch your boot so you are able to access the root user.
 

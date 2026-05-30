@@ -198,8 +198,7 @@ params:
             date: "Jan 2023 - Current"
             info:
               content: I've been many years managing Linux HPC clusters for the university.
-            content: |
-              "I'm currently in charge of two HPC clusters at my university, where I install new machines, configure new software and make sure everything works accordingly so our team of researchers can work on their projects."
+            content: "I'm currently in charge of two HPC clusters at my university, where I install new machines, configure new software and make sure everything works accordingly so our team of researchers can work on their projects."
 
       - company: "Huawei"
         companyUrl: "https://cambridgesciencepark.co.uk/directory/huawei-uk-research-centre/"

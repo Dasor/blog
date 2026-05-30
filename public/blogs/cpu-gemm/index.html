@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Accept-CH" content="DPR, Viewport-Width, Width">
+<link rel="icon" href="https://avatars.githubusercontent.com/u/36473771?v=4" type="image/gif">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      media="print" onload="this.media='all'" />
+<noscript>
+  <link
+          href="https://fonts.googleapis.com/css2?family=Alata&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+          rel="stylesheet">
+</noscript>
+
+
+<link rel="stylesheet" href="/css/font.css" media="all">
+
+
+
+<meta property="og:url" content="http://localhost:1313/blogs/cpu-gemm/">
+  <meta property="og:site_name" content="Daniel&#39;s blog">
+  <meta property="og:title" content="Optimizing CPU GEMM step by step.">
+  <meta property="og:description" content="Introduction: What is GEMM? Let’s first define what a GEMM is and why it is relevant in today’s world. GEMM refers to General Matrix Multiplication, a linear algebra operation that can be defined as:
+$$ C = \alpha AB &#43; \beta C $$
+Where A, B and C are matrices and alpha and beta are scalars. Most of the time the part we will focus on will be just A and B since multiplying two matrices is the biggest challenge.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="blogs">
+    <meta property="article:published_time" content="2026-04-01T11:12:03+02:00">
+    <meta property="article:modified_time" content="2026-04-01T11:12:03+02:00">
+    <meta property="article:tag" content="CPU">
+    <meta property="article:tag" content="Computer Architecture">
+    <meta property="article:tag" content="GEMM">
+
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Optimizing CPU GEMM step by step.">
+  <meta name="twitter:description" content="Introduction: What is GEMM? Let’s first define what a GEMM is and why it is relevant in today’s world. GEMM refers to General Matrix Multiplication, a linear algebra operation that can be defined as:
+$$ C = \alpha AB &#43; \beta C $$
+Where A, B and C are matrices and alpha and beta are scalars. Most of the time the part we will focus on will be just A and B since multiplying two matrices is the biggest challenge.">
+
+
+
+
+
+<link rel="stylesheet" href="/bootstrap-5/css/bootstrap.min.css" media="all"><link rel="stylesheet" href="/css/header.css" media="all">
+<link rel="stylesheet" href="/css/language-switcher.css" media="all">
+<link rel="stylesheet" href="/css/footer.css" media="all">
+
+
+<link rel="stylesheet" href="/css/theme.css" media="all">
+
+<style>
+    :root {
+        --text-color: #343a40;
+        --text-secondary-color: #6c757d;
+        --text-link-color: #007bff;
+        --background-color: #eaedf0;
+        --secondary-background-color: #64ffda1a;
+        --primary-color: #007bff;
+        --secondary-color: #f8f9fa;
+
+         
+        --text-color-dark: #e4e6eb;
+        --text-secondary-color-dark: #b0b3b8;
+        --text-link-color-dark: #ffffff;
+        --background-color-dark: #18191a;
+        --secondary-background-color-dark: #212529;
+        --primary-color-dark: #ffffff;
+        --secondary-color-dark: #212529;
+    }
+    body {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        text-align: left;
+    }
+
+    html {
+        background-color: var(--background-color) !important;
+    }
+
+    body::-webkit-scrollbar {
+        height: 0px;
+        width: 8px;
+        background-color: var(--background-color);
+    }
+
+    ::-webkit-scrollbar-track {
+        border-radius: 1rem;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 1rem;
+        background: #b0b0b0;
+        outline: 1px solid var(--background-color);
+    }
+
+    #search-content::-webkit-scrollbar {
+        width: .5em;
+        height: .1em;
+        background-color: var(--background-color);
+    }
+</style>
+
+
+
+<meta name="description" content="">
+<link rel="stylesheet" href="/css/single.css">
+
+
+<script defer src="/fontawesome-6/all-6.4.2.js"></script>
+
+
+  
+  
+
+  <title>
+Optimizing CPU GEMM step by step. | Daniel&#39;s blog
+
+  </title>
+</head>
+
+<body class="light">
+  
+  
+<script>
+    let localStorageValue = localStorage.getItem("pref-theme");
+    let mediaQuery = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    switch (localStorageValue) {
+        case "dark":
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+            break;
+        case "light":
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            break;
+        default:
+            if (mediaQuery) {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark');
+            }
+            break;
+    }
+</script>
+
+
+
+
+<script>
+    var prevScrollPos = window.pageYOffset;
+    window.addEventListener("scroll", function showHeaderOnScroll() {
+        let profileHeaderElem = document.getElementById("profileHeader");
+        let currentScrollPos = window.pageYOffset;
+        let resetHeaderStyle = false;
+        let showNavBarOnScrollUp =  true ;
+        let showNavBar = showNavBarOnScrollUp ? prevScrollPos > currentScrollPos : currentScrollPos > 0;
+        if (showNavBar) {
+            profileHeaderElem.classList.add("showHeaderOnTop");
+        } else {
+            resetHeaderStyle = true;
+        }
+        if(currentScrollPos === 0) {
+            resetHeaderStyle = true;
+        }
+        if(resetHeaderStyle) {
+            profileHeaderElem.classList.remove("showHeaderOnTop");
+        }
+        prevScrollPos = currentScrollPos;
+    });
+</script>
+
+
+
+<header id="profileHeader">
+    <nav class="pt-3 navbar navbar-expand-lg animate">
+        <div class="container-fluid mx-xs-2 mx-sm-5 mx-md-5 mx-lg-5">
+            
+            <a class="navbar-brand primary-font text-wrap" href="/">
+                
+                Daniel&#39;s Blog
+                
+            </a>
+
+            
+                <div>
+                    <input id="search" autocomplete="off" class="form-control mr-sm-2 d-none d-md-block" placeholder='Search...'
+                        aria-label="Search" oninput="searchOnChange(event)">
+                </div>
+            
+
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <svg aria-hidden="true" height="24" viewBox="0 0 16 16" version="1.1" width="24" data-view-component="true">
+                    <path fill-rule="evenodd" d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"></path>
+                </svg>
+            </button>
+
+            
+            <div class="collapse navbar-collapse text-wrap primary-font" id="navbarContent">
+                <ul class="navbar-nav ms-auto text-center">
+                    
+                        <li class="nav-item navbar-text d-block d-md-none">
+                            <div class="nav-link">
+                                <input id="search" autocomplete="off" class="form-control mr-sm-2" placeholder='Search...' aria-label="Search" oninput="searchOnChange(event)">
+                            </div>
+                        </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#about" aria-label="about">
+                            About Me
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#experience"
+                            aria-label="experience">
+                            Experience
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#education"
+                            aria-label="education">
+                            Education
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/#contact"
+                            aria-label="contact">
+                            Contact
+                        </a>
+                    </li>
+                    
+
+                    
+
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/blogs" title="Blog posts">
+                            
+                            Blog
+                        </a>
+                    </li>
+                    
+                    
+                    
+                    
+                    <li class="nav-item navbar-text">
+                        <a class="nav-link" href="/donations" title="Donations">
+                            
+                            Donations
+                        </a>
+                    </li>
+                    
+                    
+
+                    <li class="nav-item navbar-text">
+                        
+                        <div class="text-center">
+                            <button id="theme-toggle" type="button" aria-label="Toggle dark mode">
+                                <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                </svg>
+                                <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="5"></circle>
+                                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </li>
+                    
+
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+</header>
+<div id="content">
+<section id="single">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-12 col-lg-9">
+        <div class="pr-lg-4">
+          <div class="title mb-5">
+            <h1 class="text-center mb-4">Optimizing CPU GEMM step by step.</h1>
+            <div class="text-center">
+              
+                Daniel
+                <small>|</small>
+              
+              Apr 1, 2026
+
+              
+              <span id="readingTime">
+                min read
+              </span>
+              
+            </div>
+          </div>
+          
+          <div class="featured-image">
+            <img class="img-fluid mx-auto d-block" src="/images/CPU_GEMM_Cover.png" alt="Optimizing CPU GEMM step by step.">
+          </div>
+          
+          <article class="page-content  p-2">
+          <h2 id="introduction-what-is-gemm">Introduction: What is GEMM?</h2>
+<p>Let&rsquo;s first define what a GEMM is and why it is relevant in today&rsquo;s world. GEMM refers to <strong>General Matrix Multiplication</strong>, a linear algebra operation that can be defined as:</p>
+<p>$$ C = \alpha AB + \beta C $$</p>
+<p>Where A, B and C are matrices and alpha and beta are scalars. Most of the time the part we will focus on will be just A and B since multiplying two matrices is the biggest challenge.</p>
+<p>Without getting into too much detail, GEMMs are the backbone of modern AI, every model you run has lots of GEMMs behind, not just LLMs but vision models or classification models too. In this article we won&rsquo;t cover why those neural nets are just a bunch of GEMMs (and some other things), the idea to grasp is that a good GEMM kernel means improvement in the AI world.</p>
+<p>By the way, the word <em>kernel</em> might sound strange to you, we are not talking about anything Linux related. Kernel is the name we use to describe a highly specialized software function or subroutine in charge of performing an operation. In this article we will be developing GEMM kernels for the CPU.</p>
+<h2 id="why-the-cpu">Why the CPU?</h2>
+<p>Today&rsquo;s AI world is clearly dominated by GPUs, that&rsquo;s a fact. Then, why are we using the CPU? well, there are a few reasons behind this decision:</p>
+<ul>
+<li><strong>Complexity</strong>: Kernel programming is <strong>really hard</strong> and it gets even harder when we moved to specialized hardware like GPUs. We will have a easier time (not easy but easier) on the CPU to learn about the problem and the approach to optimizing it.</li>
+<li><strong>Power usage</strong>: GPUs are in general really power hungry, the CPU is less power hungry and used in some low power scenarios (although there are low power GPUs and ASICs too)</li>
+<li><strong>Memory Bandwidth</strong>: In most cases AI is quite memory bound so more raw compute power (like having a GPU) won&rsquo;t solve this issue. Having an external chip also means that the data must travel via PCIe from the CPU and back. That&rsquo;s why CPUs are still used in some scenarios <cite><sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></cite></li>
+</ul>
+<h2 id="considerations-before-starting">Considerations before starting</h2>
+<p>I want this post to be as focused on kernel development as possible, that is why we won&rsquo;t discuss things as measuring time or other aspects here, for those interested the code will be on my GitHub. We will follow a simple approach where we present a basic kernel and will keep expanding it and improving it without focusing on the main function of the code. As with almost all code that is HPC related in the CPU we will be using C which let&rsquo;s us control really low level details.</p>
+<h2 id="basic-kernel">Basic Kernel</h2>
+<p>The most basic kernel one can think of is usually one that looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">gemm</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> beta, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (beta <span style="color:#f92672">!=</span> <span style="color:#ae81ff">1.0f</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M<span style="color:#f92672">*</span>N; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      C[i] <span style="color:#f92672">*=</span> beta;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> K; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In here we are first, precomputing the beta scaling and then doing the matrix multiplication also adding alpha. The algorithm used here is inner product which just means we are taking a row of A and a column of B this is the way you were probably taught in your algebra class in high-school.</p>
+<p>However, we could do it the opposite way, taking the columns of A and the rows of B, Does it matter?. Yes it does, here is where the first important concept regarding CPU architecture comes up and it&rsquo;s caches.</p>
+<p>By decreasing the cache fails we will get an speedup as every cache fail introduces a penalty of many cycles. Using an inner product approach (Columns of A, rows of B) helps reduce cache misses. To do that we just need to change the order of the loops to:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">gemm</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> beta, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (beta <span style="color:#f92672">!=</span> <span style="color:#ae81ff">1.0f</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M<span style="color:#f92672">*</span>N; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      C[i] <span style="color:#f92672">*=</span> beta;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M; i<span style="color:#f92672">++</span>) 
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> K; k<span style="color:#f92672">++</span>) 
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Here making the j loop the innermost one means that we will take a single element of A and multiply it with a whole row of B, this way we will be accessing B in a more cache friendly way. However, now we will be calculating partial sums in C. Still, this way is more cache friendly for now.</p>
+<p>The last thing we can do to conclude this section is a really simple improvement yet one that will give us good performance gains and it&rsquo;s using all of our CPU cores (as now we are using just one). A simple way to do it is by using OpenMP, we just need to add a single pragma:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">gemm</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> beta, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (beta <span style="color:#f92672">!=</span> <span style="color:#ae81ff">1.0f</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M<span style="color:#f92672">*</span>N; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      C[i] <span style="color:#f92672">*=</span> beta;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">#pragma omp parallel for
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M; i<span style="color:#f92672">++</span>) 
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> K; k<span style="color:#f92672">++</span>) 
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This pragma splits the work of every iteration in different treads (and thus in different cores). Here we are exploiting the fact that every element of C can be calculated independently, we call this Data Level Parallelism (or DLP) and that is why there are no race conditions here.</p>
+<p>With this we can conclude a basic implementation that yields a performance of 167 GFlops on my CPU (Intel Core i9-10900) for reference state of the art libraries like OpenBLAS can reach up to 1 TFLop on my CPU so we still have lots of work to do.</p>
+<h2 id="tiling">Tiling</h2>
+<p>Tiling is one of the most important optimizations in general (not just for CPUs) its goal is to partition the matrix into smaller matrices so that smaller matrices fit into higher levels of memory in the case of the CPU on caches.</p>
+<p>Since we will be computing sub-matrices we need to take into account that each step we will be calculating partial sums not the whole result at once. In terms of code we are splitting it into two functions, the first function is almost identical to the one we had earlier:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ukernel</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">int</span> i_begin, <span style="color:#66d9ef">int</span> j_begin, <span style="color:#66d9ef">int</span> k_begin, <span style="color:#66d9ef">int</span> i_end, <span style="color:#66d9ef">int</span> j_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> i_begin; i <span style="color:#f92672">&lt;</span> i_end; i<span style="color:#f92672">++</span>) 
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>) 
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> j_begin; j <span style="color:#f92672">&lt;</span> j_end; j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>But we are also setting the start and end of our sub-matrix so we don&rsquo;t calculate the whole thing. Next we just need to call this function from another function that takes care of correctly partitioning the matrix:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#75715e">#define min(a, b) (((a) &lt; (b)) ? (a) : (b))
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">gemm</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> beta, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C,
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> tile_size_M, <span style="color:#66d9ef">int</span> tile_size_N, <span style="color:#66d9ef">int</span> tile_size_K)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (beta <span style="color:#f92672">!=</span> <span style="color:#ae81ff">1.0f</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M <span style="color:#f92672">*</span> N; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      C[i] <span style="color:#f92672">*=</span> beta;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">#pragma omp parallel for collapse(2)
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M; i <span style="color:#f92672">+=</span> tile_size_M)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; j <span style="color:#f92672">+=</span> tile_size_N)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> K; k <span style="color:#f92672">+=</span> tile_size_K)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> i_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(i <span style="color:#f92672">+</span> tile_size_M, M);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> j_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(j <span style="color:#f92672">+</span> tile_size_N, N);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> k_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(k <span style="color:#f92672">+</span> tile_size_K, K);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">ukernel</span>(M, N, K, i, j, k, i_end, j_end, k_end, alpha, A, B, C);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Here we apply the beta scaling and do the needed arithmetic to make sure we partition the sub-matrices correctly, we now apply the OpenMP parallelization here (the collapse directive collapses both loops into one and parallelizes both).</p>
+<p>There are also parameters that indicate the tile size, selecting an optimal or near optimal tile size is a crucial non-trivial task that could take another entire blog post. Mainly you need to make sure that with the sizes you select the matrices must fit on your different levels of cache but there is also a big part of experimenting with different sizes as caches are complex structures and theoretical calculations are not enough.</p>
+<p>In this case I have just carried out some theoretical calculations so we can expect that the tile size selected is not the best but enough for this example. Taking into account the tile of A  is of size M*K and the tile of B is of size K*N and I want my tile of A to fit on my L1 (320KB) and B on my L2 (2.5MB) I selected: M=32, N=1024, K=256. Using a big N, medium K and small M is usually a great approximation.</p>
+<p>However, with this optimization we just got 165 GFlops so no improvement at all. Still tilling will be useful when we apply more optimization on top of it.</p>
+<h2 id="vectorization-with-intrinsics">Vectorization with Intrinsics</h2>
+<p>Another important hardware part of the CPU are SIMD (Single Instruction Multiple Data) units, as the name implies this unit run a single instruction over a vector of data for example let&rsquo;s say you have a two vectors V and U and you want to add the components of both. Here is a silly example:</p>
+<pre tabindex="0"><code>V = {1 2 3 4 5 6 7 8}
+U = {8 7 6 5 4 3 2 1}
+
+W = U + V = {9 9 9 9 9 9 9 9}
+</code></pre><p>Here V and U are vectors of size 8 if we interpret each number as a 32-bit value we have 256 bits for each vector. Now imagine you had registers of 256 bits in your CPU and functional units capable of using them, well turns out you do!.</p>
+<p>Those are the SIMD units, implementations varies according to the architecture but for x86 CPUs you will mostly find AVX2 and on ARM chips you might find NEON (or newer SVE) but both work similarly. With AVX2 we now have 256 bit registers and assembly operations that can operate on them, that means we can populate those registers with 8 32-bit elements 16 16-bit elements or any combination supported by the hardware and a single instruction will operate over all of the data (SIMD).</p>
+<p>If you are interested SIMD can get better and more complex that just AVX, there are vector processor which were the main supercomputers back in the 80&rsquo;s and the philosophy behind it still applies to ARM SVE and SME and into the RISC-V vector extensions. However in our case we will just stick with AVX.</p>
+<p>In our GEMM code there is a clear point where we are operating with vectors and it&rsquo;s on the accumulation:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span>C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span></code></pre></div><p>There we are taking an element of A and multiplying it over a vector of B, the compiler is probably translating this to AVX instructions already but by doing it manually we can ensure it is done in a more efficient way. For that we will need <em>intrinsics</em> which are just special low level instructions that map directly to assembly. Here is how our ukernel would look like now (tiling stays the same):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ukernel</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">int</span> i_begin, <span style="color:#66d9ef">int</span> j_begin, <span style="color:#66d9ef">int</span> k_begin, <span style="color:#66d9ef">int</span> i_end, <span style="color:#66d9ef">int</span> j_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> i_begin; i <span style="color:#f92672">&lt;</span> i_end; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> j_begin;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;=</span> j_end<span style="color:#f92672">-</span><span style="color:#ae81ff">8</span>; j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Load 8 elements of C
+</span></span></span><span style="display:flex;"><span>      __m256 c_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Broadcast a single A element into a vector register
+</span></span></span><span style="display:flex;"><span>        __m256 a_broadcast <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> alpha);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Load 8 elements of B
+</span></span></span><span style="display:flex;"><span>        __m256 b_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// FMA
+</span></span></span><span style="display:flex;"><span>        c_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a_broadcast, b_vec, c_vec);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Write to memory
+</span></span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], c_vec);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Remainder loop.
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;</span> j_end; j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>As you can see we are not using <code>__m256</code> datatype that represent those 256 bit registers we spoke about, thats also why the j loop now increments 8 by 8. In the accumulation we use the <code>fmadd</code> instructions which just means Fused Multiply Add and its a special instruction that performs a multiplication and addition at the same time plus it is also a vector instruction.</p>
+<p>An iteration of how this would work can be seen here (assuming vector of 4 elements for simplicity):</p>
+<p><img src="/images/instrisics.png" alt="image"></p>
+<p>With this implementation we get&hellip; 136 GFLops, you might be starting to think that this is quite dumb as we are each step of the way introducing complexity and worsening the performance but this has an easy explanation and I promise you next time we will surely get a speed-up.</p>
+<p>The reason why this code performs worse is because now that we are using intrinsics, the compiler cannot optimize as much as we have taken part of his work and it did a better job than us (for now). But next I will show you a simple and key optimization that will get us a great speedup.</p>
+<h2 id="loop-unrolling">Loop Unrolling</h2>
+<p>One of the optimizations the compiler normally carries out is Loop Unrolling, this just means using bigger &ldquo;steps&rdquo; on a loop for example if you write something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> N; i<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">do_something</span>(i);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The compiler might unroll it to something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> N; i<span style="color:#f92672">+=</span><span style="color:#ae81ff">4</span>){
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">do_something</span>(i<span style="color:#f92672">+</span><span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">do_something</span>(i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">do_something</span>(i<span style="color:#f92672">+</span><span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">do_something</span>(i<span style="color:#f92672">+</span><span style="color:#ae81ff">3</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This is to avoid loop overhead since every time we do a new iteration a jump instruction happens to go to the start of the loop again adding some overhead. On top of that we also squeeze more performance of the functional units with this as if we have more than one functional unit we can run several operations in parallel. That is why this optimization is key, this is how this optimization looks on our GEMM code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ukernel</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">int</span> i_begin, <span style="color:#66d9ef">int</span> j_begin, <span style="color:#66d9ef">int</span> k_begin, <span style="color:#66d9ef">int</span> i_end, <span style="color:#66d9ef">int</span> j_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> i_begin;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (; i <span style="color:#f92672">&lt;=</span> i_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">4</span>; i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> j_begin;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;=</span> j_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">8</span>; j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      __m256 c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        __m256 a0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> alpha);
+</span></span><span style="display:flex;"><span>        __m256 a1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> alpha);
+</span></span><span style="display:flex;"><span>        __m256 a2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> alpha);
+</span></span><span style="display:flex;"><span>        __m256 a3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> alpha);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        __m256 b_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a0, b_vec, c0);
+</span></span><span style="display:flex;"><span>        c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a1, b_vec, c1);
+</span></span><span style="display:flex;"><span>        c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a2, b_vec, c2);
+</span></span><span style="display:flex;"><span>        c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a3, b_vec, c3);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], c0);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], c1);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], c2);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], c3);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Remainder
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;</span> j_end; j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Remainder loop
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (; i <span style="color:#f92672">&lt;</span> i_end; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> j_begin;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;=</span> j_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">8</span>; j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      __m256 c_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        __m256 a_broadcast <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> alpha);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        __m256 b_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        c_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a_broadcast, b_vec, c_vec);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], c_vec);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Remainder loop
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;</span> j_end; j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>As seen here the only thing we did is unroll the i loop by four, we also had to add the proper logic to handle sizes that are not multiples of four. With this we finally get a small improvement and manage to get 289 GFlops.</p>
+<h2 id="more-aggressive-unrolling">More aggressive unrolling.</h2>
+<p>We can increase the unrolling, this is not just an arbitrary decision, it&rsquo;s based on the fact that AVX2 brings 16 vector registers and our goal is to use them all so increasing the unrolling from 4 to 8 can help. On top of that we can also optimize our algorithm a bit as we can take the computation of alpha out of the loop as we now have $$\sum(\alpha A B)$$ which is equal to $$\alpha \sum(AB)$$. The code now looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ukernel</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">int</span> i_begin, <span style="color:#66d9ef">int</span> j_begin, <span style="color:#66d9ef">int</span> k_begin, <span style="color:#66d9ef">int</span> i_end, <span style="color:#66d9ef">int</span> j_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> i_begin;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (; i <span style="color:#f92672">&lt;=</span> i_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">8</span>; i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> j_begin;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;=</span> j_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">8</span>; j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      __m256 c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        __m256 a0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">6</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        __m256 b_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a0, b_vec, c0);
+</span></span><span style="display:flex;"><span>        c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a1, b_vec, c1);
+</span></span><span style="display:flex;"><span>        c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a2, b_vec, c2);
+</span></span><span style="display:flex;"><span>        c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a3, b_vec, c3);
+</span></span><span style="display:flex;"><span>        c4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a4, b_vec, c4);
+</span></span><span style="display:flex;"><span>        c5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a5, b_vec, c5);
+</span></span><span style="display:flex;"><span>        c6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a6, b_vec, c6);
+</span></span><span style="display:flex;"><span>        c7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a7, b_vec, c7);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      __m256 alpha_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(alpha);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      __m256 C0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">6</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      C0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c0, alpha_vec, C0);
+</span></span><span style="display:flex;"><span>      C1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c1, alpha_vec, C1);
+</span></span><span style="display:flex;"><span>      C2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c2, alpha_vec, C2);
+</span></span><span style="display:flex;"><span>      C3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c3, alpha_vec, C3);
+</span></span><span style="display:flex;"><span>      C4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c4, alpha_vec, C4);
+</span></span><span style="display:flex;"><span>      C5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c5, alpha_vec, C5);
+</span></span><span style="display:flex;"><span>      C6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c6, alpha_vec, C6);
+</span></span><span style="display:flex;"><span>      C7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c7, alpha_vec, C7);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], C0);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], C1);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], C2);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], C3);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], C4);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], C5);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">6</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], C6);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], C7);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Remainder
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;</span> j_end; j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">5</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">5</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">6</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">6</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>        C[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">7</span>) <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[(i<span style="color:#f92672">+</span><span style="color:#ae81ff">7</span>) <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Remainder
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (; i <span style="color:#f92672">&lt;</span> i_end; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> j_begin;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;=</span> j_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">8</span>; j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      __m256 c_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        __m256 a_broadcast <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> alpha);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        __m256 b_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        c_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a_broadcast, b_vec, c_vec);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j], c_vec);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//Remainder
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;</span> j_end; j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> k_begin; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j] <span style="color:#f92672">+=</span> alpha <span style="color:#f92672">*</span> A[i <span style="color:#f92672">*</span> K <span style="color:#f92672">+</span> k] <span style="color:#f92672">*</span> B[k <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="packing">Packing</h2>
+<p>Packing is based on the idea of having fragments of A and B in a more friendly way arranged in memory. The goal for now is not having to access the memory using a big offset like we are doing with K and N. To do that we need a couple functions, one to pack A and one to pack B</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">packA</span>(<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">int</span> tile_size_M, <span style="color:#66d9ef">int</span> tile_size_K, <span style="color:#66d9ef">int</span> i_begin, <span style="color:#66d9ef">int</span> k_begin, <span style="color:#66d9ef">int</span> i_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_A)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> tile_size_M; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> tile_size_K; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">int</span> ii <span style="color:#f92672">=</span> i_begin <span style="color:#f92672">+</span> i;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">int</span> kk <span style="color:#f92672">=</span> k_begin <span style="color:#f92672">+</span> k;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (ii <span style="color:#f92672">&lt;</span> M <span style="color:#f92672">&amp;&amp;</span> kk <span style="color:#f92672">&lt;</span> K)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        packed_A[i <span style="color:#f92672">*</span> tile_size_K <span style="color:#f92672">+</span> k] <span style="color:#f92672">=</span> A[(ii <span style="color:#f92672">*</span> K) <span style="color:#f92672">+</span> kk];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        packed_A[i <span style="color:#f92672">*</span> tile_size_K <span style="color:#f92672">+</span> k] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0f</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">packB</span>(<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">int</span> tile_size_N, <span style="color:#66d9ef">int</span> tile_size_K, <span style="color:#66d9ef">int</span> j_begin, <span style="color:#66d9ef">int</span> k_begin, <span style="color:#66d9ef">int</span> j_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_B)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> tile_size_K; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> tile_size_N; j<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">int</span> kk <span style="color:#f92672">=</span> k_begin <span style="color:#f92672">+</span> k;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">int</span> jj <span style="color:#f92672">=</span> j_begin <span style="color:#f92672">+</span> j;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">if</span> (kk <span style="color:#f92672">&lt;</span> K <span style="color:#f92672">&amp;&amp;</span> jj <span style="color:#f92672">&lt;</span> N)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        packed_B[k <span style="color:#f92672">*</span> tile_size_N <span style="color:#f92672">+</span> j] <span style="color:#f92672">=</span> B[(kk <span style="color:#f92672">*</span> N) <span style="color:#f92672">+</span> jj];
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        packed_B[k <span style="color:#f92672">*</span> tile_size_N <span style="color:#f92672">+</span> j] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0f</span>;
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The buffers where we are storing those pieces of A and B will be the same size of a tile for convenience. Now that all of our memory is contiguous we need to change the kernel to access the data correctly:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ukernel</span>(<span style="color:#66d9ef">int</span> lda, <span style="color:#66d9ef">int</span> ldb, <span style="color:#66d9ef">int</span> ldc, <span style="color:#66d9ef">int</span> i_end, <span style="color:#66d9ef">int</span> j_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (; i <span style="color:#f92672">&lt;=</span> i_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">8</span>; i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;=</span> j_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">8</span>; j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Load 8 elements of C for 8 rows
+</span></span></span><span style="display:flex;"><span>      __m256 c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> k_end; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Load A with broadcast (and mul alpha)
+</span></span></span><span style="display:flex;"><span>        __m256 a0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>) <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">6</span>) <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>        __m256 a7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(A[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>) <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> k]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Load 8 elements of B
+</span></span></span><span style="display:flex;"><span>        __m256 b_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>B[k <span style="color:#f92672">*</span> ldb <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// FMA
+</span></span></span><span style="display:flex;"><span>        c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a0, b_vec, c0);
+</span></span><span style="display:flex;"><span>        c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a1, b_vec, c1);
+</span></span><span style="display:flex;"><span>        c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a2, b_vec, c2);
+</span></span><span style="display:flex;"><span>        c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a3, b_vec, c3);
+</span></span><span style="display:flex;"><span>        c4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a4, b_vec, c4);
+</span></span><span style="display:flex;"><span>        c5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a5, b_vec, c5);
+</span></span><span style="display:flex;"><span>        c6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a6, b_vec, c6);
+</span></span><span style="display:flex;"><span>        c7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(a7, b_vec, c7);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      __m256 alpha_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(alpha);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      __m256 C0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">6</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      C0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c0, alpha_vec, C0);
+</span></span><span style="display:flex;"><span>      C1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c1, alpha_vec, C1);
+</span></span><span style="display:flex;"><span>      C2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c2, alpha_vec, C2);
+</span></span><span style="display:flex;"><span>      C3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c3, alpha_vec, C3);
+</span></span><span style="display:flex;"><span>      C4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c4, alpha_vec, C4);
+</span></span><span style="display:flex;"><span>      C5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c5, alpha_vec, C5);
+</span></span><span style="display:flex;"><span>      C6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c6, alpha_vec, C6);
+</span></span><span style="display:flex;"><span>      C7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c7, alpha_vec, C7);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Write
+</span></span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C0);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C1);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C2);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C3);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C4);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C5);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">6</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C6);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C7);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The code now is simpler as now we know the exact size we will be computing and there is no need for remainder loops. Lastly we need to pack our data before every kernel call:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">gemm</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> beta, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C,
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> tile_size_M, <span style="color:#66d9ef">int</span> tile_size_N, <span style="color:#66d9ef">int</span> tile_size_K)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (beta <span style="color:#f92672">!=</span> <span style="color:#ae81ff">1.0f</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M <span style="color:#f92672">*</span> N; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      C[i] <span style="color:#f92672">*=</span> beta;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma omp parallel
+</span></span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_A <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">malloc</span>(<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>) <span style="color:#f92672">*</span> tile_size_M <span style="color:#f92672">*</span> tile_size_K);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_B <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">malloc</span>(<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>) <span style="color:#f92672">*</span> tile_size_N <span style="color:#f92672">*</span> tile_size_K);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma omp for collapse(2)
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M; i <span style="color:#f92672">+=</span> tile_size_M)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; j <span style="color:#f92672">+=</span> tile_size_N)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> K; k <span style="color:#f92672">+=</span> tile_size_K)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> i_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(i <span style="color:#f92672">+</span> tile_size_M, M);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> j_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(j <span style="color:#f92672">+</span> tile_size_N, N);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> k_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(k <span style="color:#f92672">+</span> tile_size_K, K);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">packA</span>(A, tile_size_M, tile_size_K, i, k, i_end, k_end, M, K, packed_A);
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">packB</span>(B, tile_size_N, tile_size_K, j, k, j_end, k_end, K, N, packed_B);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">ukernel</span>(tile_size_K, tile_size_N, N, tile_size_M, tile_size_N, tile_size_K, alpha, packed_A, packed_B, <span style="color:#f92672">&amp;</span>C[i <span style="color:#f92672">*</span> N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">free</span>(packed_A);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">free</span>(packed_B);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>We allocate one buffer per thread so we can keep doing the work concurrently. Still the data is not perfectly contiguos as we are still using a leading dimension. The ideal thing would be to have the columns of A and the rows of B all contiguos in memory. Also we are packing redundantly as for example packing A only depends on i and k but for every iteration of j we are also packing it again. That makes this implementation worse with a result of 169 GFlops.</p>
+<h2 id="improved-packing">Improved Packing</h2>
+<p>Our packing in the past section is not the best. If we remember we are accessing <strong>one</strong> element of A column-wise and we are broadcasting that element which we are multiplying against a row of B. Our goal is to translate that layout into the packing. To visualize this idea we can look at the following image.</p>
+<p><img src="/images/pack.png" alt="image"></p>
+<p>To accomplish this in the code we need to play with the indexing again:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">packA</span>(<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">int</span> tile_size_M, <span style="color:#66d9ef">int</span> tile_size_K, <span style="color:#66d9ef">int</span> i_begin, <span style="color:#66d9ef">int</span> k_begin, <span style="color:#66d9ef">int</span> i_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_A)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> tile_size_M; i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> tile_size_K; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> ii <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; ii <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">8</span>; ii<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> global_i <span style="color:#f92672">=</span> i_begin <span style="color:#f92672">+</span> i <span style="color:#f92672">+</span> ii;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> global_k <span style="color:#f92672">=</span> k_begin <span style="color:#f92672">+</span> k;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (global_i <span style="color:#f92672">&lt;</span> M <span style="color:#f92672">&amp;&amp;</span> global_k <span style="color:#f92672">&lt;</span> K)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          packed_A[idx<span style="color:#f92672">++</span>] <span style="color:#f92672">=</span> A[(global_i <span style="color:#f92672">*</span> K) <span style="color:#f92672">+</span> global_k];
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          packed_A[idx<span style="color:#f92672">++</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0f</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">packB</span>(<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">int</span> tile_size_N, <span style="color:#66d9ef">int</span> tile_size_K, <span style="color:#66d9ef">int</span> j_begin, <span style="color:#66d9ef">int</span> k_begin, <span style="color:#66d9ef">int</span> j_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_B)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> tile_size_N; j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> tile_size_K; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> jj <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; jj <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">8</span>; jj<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> global_k <span style="color:#f92672">=</span> k_begin <span style="color:#f92672">+</span> k;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> global_j <span style="color:#f92672">=</span> j_begin <span style="color:#f92672">+</span> j <span style="color:#f92672">+</span> jj;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (global_k <span style="color:#f92672">&lt;</span> K <span style="color:#f92672">&amp;&amp;</span> global_j <span style="color:#f92672">&lt;</span> N)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          packed_B[idx<span style="color:#f92672">++</span>] <span style="color:#f92672">=</span> B[(global_k <span style="color:#f92672">*</span> N) <span style="color:#f92672">+</span> global_j];
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          packed_B[idx<span style="color:#f92672">++</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0f</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Another optimization is changing the loop order to avoid unnecessary packing calls as mentioned before:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">gemm</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> beta, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C,
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> tile_size_M, <span style="color:#66d9ef">int</span> tile_size_N, <span style="color:#66d9ef">int</span> tile_size_K, <span style="color:#66d9ef">int</span> padded_N)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (beta <span style="color:#f92672">!=</span> <span style="color:#ae81ff">1.0f</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M <span style="color:#f92672">*</span> padded_N; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      C[i] <span style="color:#f92672">*=</span> beta;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_B <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">malloc</span>(<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>) <span style="color:#f92672">*</span> tile_size_K <span style="color:#f92672">*</span> tile_size_N);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">#pragma omp parallel
+</span></span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_A <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">malloc</span>(<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>) <span style="color:#f92672">*</span> tile_size_M <span style="color:#f92672">*</span> tile_size_K);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; j <span style="color:#f92672">+=</span> tile_size_N)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> K; k <span style="color:#f92672">+=</span> tile_size_K)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">#pragma omp single
+</span></span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> j_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(j <span style="color:#f92672">+</span> tile_size_N, N);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> k_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(k <span style="color:#f92672">+</span> tile_size_K, K);
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">packB</span>(B, tile_size_N, tile_size_K, j, k, j_end, k_end, K, N, packed_B);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">#pragma omp for
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M; i <span style="color:#f92672">+=</span> tile_size_M)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> i_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(i <span style="color:#f92672">+</span> tile_size_M, M);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> k_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(k <span style="color:#f92672">+</span> tile_size_K, K);
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">packA</span>(A, tile_size_M, tile_size_K, i, k, i_end, k_end, M, K, packed_A);
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">ukernel</span>(tile_size_K, tile_size_N, padded_N, tile_size_M, tile_size_N, tile_size_K, alpha, packed_A, packed_B, <span style="color:#f92672">&amp;</span>C[i <span style="color:#f92672">*</span> padded_N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">free</span>(packed_A);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">free</span>(packed_B);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The idea behind this is that B only depends on the j and k indices and A only depends on the k and i indices. With this new order we are just packing B when it is needed saving lots of calls. In the case of A we are still calling it more times than needed but there is no loop ordering that can benefit both A and B.</p>
+<p>With this optimization we reach 487 GFLOPS.</p>
+<h2 id="alignment-and-more-unrolling">Alignment and more Unrolling</h2>
+<p>One small but relevant detail we have not taken into account is that our buffers are perfectly aligned in memory (that is another reason why packing is useful). That let&rsquo;s us use a slightly different intrinsic instead of using <code>_mm256_loadu_psu</code> we can use <code>_mm256_loadu_ps</code> (notice the missing U which means unaligned). On top of that we add some hints to the compiler so it knows memory is aligned and the intrinsics we use for memory allocating will also allocate aligned memory.</p>
+<p>Lastly, I decided to unroll the innermost loop too and to add a pragma for vectorization in the packing function although it was probably getting vectorized automatically before. The whole code looks like this now:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-C" data-lang="C"><span style="display:flex;"><span><span style="color:#a6e22e">__attribute__</span>((always_inline)) <span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">ukernel</span>(<span style="color:#66d9ef">int</span> lda, <span style="color:#66d9ef">int</span> ldb, <span style="color:#66d9ef">int</span> ldc, <span style="color:#66d9ef">int</span> i_end, <span style="color:#66d9ef">int</span> j_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">restrict</span> A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">restrict</span> B, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">restrict</span> C)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  A <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">__builtin_assume_aligned</span>(A, <span style="color:#ae81ff">32</span>);
+</span></span><span style="display:flex;"><span>  B <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">__builtin_assume_aligned</span>(B, <span style="color:#ae81ff">32</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (; i <span style="color:#f92672">&lt;=</span> i_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">8</span>; i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (; j <span style="color:#f92672">&lt;=</span> j_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">8</span>; j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Load 8 elements of C for 8 rows
+</span></span></span><span style="display:flex;"><span>      __m256 c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>      __m256 c7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_setzero_ps</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (; k <span style="color:#f92672">&lt;=</span> k_end <span style="color:#f92672">-</span> <span style="color:#ae81ff">4</span>; k <span style="color:#f92672">+=</span> <span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>a_ptr_0 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>A[i <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> k <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span>];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>b_ptr_0 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>B[j <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> k <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Load 8 elements of B
+</span></span></span><span style="display:flex;"><span>        __m256 b_vec_0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_load_ps</span>(b_ptr_0);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// FMA (acumulativo)
+</span></span></span><span style="display:flex;"><span>        c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_0[<span style="color:#ae81ff">0</span>]), b_vec_0, c0);
+</span></span><span style="display:flex;"><span>        c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_0[<span style="color:#ae81ff">1</span>]), b_vec_0, c1);
+</span></span><span style="display:flex;"><span>        c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_0[<span style="color:#ae81ff">2</span>]), b_vec_0, c2);
+</span></span><span style="display:flex;"><span>        c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_0[<span style="color:#ae81ff">3</span>]), b_vec_0, c3);
+</span></span><span style="display:flex;"><span>        c4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_0[<span style="color:#ae81ff">4</span>]), b_vec_0, c4);
+</span></span><span style="display:flex;"><span>        c5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_0[<span style="color:#ae81ff">5</span>]), b_vec_0, c5);
+</span></span><span style="display:flex;"><span>        c6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_0[<span style="color:#ae81ff">6</span>]), b_vec_0, c6);
+</span></span><span style="display:flex;"><span>        c7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_0[<span style="color:#ae81ff">7</span>]), b_vec_0, c7);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// --------------- k+1 ----------------
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>a_ptr_1 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>A[i <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> (k <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span>];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>b_ptr_1 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>B[j <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> (k <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Load 8 elements of B
+</span></span></span><span style="display:flex;"><span>        __m256 b_vec_1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_load_ps</span>(b_ptr_1);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// FMA (acumulativo)
+</span></span></span><span style="display:flex;"><span>        c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_1[<span style="color:#ae81ff">0</span>]), b_vec_1, c0);
+</span></span><span style="display:flex;"><span>        c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_1[<span style="color:#ae81ff">1</span>]), b_vec_1, c1);
+</span></span><span style="display:flex;"><span>        c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_1[<span style="color:#ae81ff">2</span>]), b_vec_1, c2);
+</span></span><span style="display:flex;"><span>        c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_1[<span style="color:#ae81ff">3</span>]), b_vec_1, c3);
+</span></span><span style="display:flex;"><span>        c4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_1[<span style="color:#ae81ff">4</span>]), b_vec_1, c4);
+</span></span><span style="display:flex;"><span>        c5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_1[<span style="color:#ae81ff">5</span>]), b_vec_1, c5);
+</span></span><span style="display:flex;"><span>        c6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_1[<span style="color:#ae81ff">6</span>]), b_vec_1, c6);
+</span></span><span style="display:flex;"><span>        c7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_1[<span style="color:#ae81ff">7</span>]), b_vec_1, c7);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// --------------- k+2 ----------------
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>a_ptr_2 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>A[i <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> (k <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span>];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>b_ptr_2 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>B[j <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> (k <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Load 8 elements of B
+</span></span></span><span style="display:flex;"><span>        __m256 b_vec_2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_load_ps</span>(b_ptr_2);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// FMA (acumulativo)
+</span></span></span><span style="display:flex;"><span>        c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_2[<span style="color:#ae81ff">0</span>]), b_vec_2, c0);
+</span></span><span style="display:flex;"><span>        c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_2[<span style="color:#ae81ff">1</span>]), b_vec_2, c1);
+</span></span><span style="display:flex;"><span>        c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_2[<span style="color:#ae81ff">2</span>]), b_vec_2, c2);
+</span></span><span style="display:flex;"><span>        c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_2[<span style="color:#ae81ff">3</span>]), b_vec_2, c3);
+</span></span><span style="display:flex;"><span>        c4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_2[<span style="color:#ae81ff">4</span>]), b_vec_2, c4);
+</span></span><span style="display:flex;"><span>        c5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_2[<span style="color:#ae81ff">5</span>]), b_vec_2, c5);
+</span></span><span style="display:flex;"><span>        c6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_2[<span style="color:#ae81ff">6</span>]), b_vec_2, c6);
+</span></span><span style="display:flex;"><span>        c7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_2[<span style="color:#ae81ff">7</span>]), b_vec_2, c7);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// --------------- k+3 ----------------
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>a_ptr_3 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>A[i <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> (k <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span>];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>b_ptr_3 <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>B[j <span style="color:#f92672">*</span> lda <span style="color:#f92672">+</span> (k <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> <span style="color:#ae81ff">8</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Load 8 elements of B
+</span></span></span><span style="display:flex;"><span>        __m256 b_vec_3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_load_ps</span>(b_ptr_3);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// FMA
+</span></span></span><span style="display:flex;"><span>        c0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_3[<span style="color:#ae81ff">0</span>]), b_vec_3, c0);
+</span></span><span style="display:flex;"><span>        c1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_3[<span style="color:#ae81ff">1</span>]), b_vec_3, c1);
+</span></span><span style="display:flex;"><span>        c2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_3[<span style="color:#ae81ff">2</span>]), b_vec_3, c2);
+</span></span><span style="display:flex;"><span>        c3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_3[<span style="color:#ae81ff">3</span>]), b_vec_3, c3);
+</span></span><span style="display:flex;"><span>        c4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_3[<span style="color:#ae81ff">4</span>]), b_vec_3, c4);
+</span></span><span style="display:flex;"><span>        c5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_3[<span style="color:#ae81ff">5</span>]), b_vec_3, c5);
+</span></span><span style="display:flex;"><span>        c6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_3[<span style="color:#ae81ff">6</span>]), b_vec_3, c6);
+</span></span><span style="display:flex;"><span>        c7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(<span style="color:#a6e22e">_mm256_set1_ps</span>(a_ptr_3[<span style="color:#ae81ff">7</span>]), b_vec_3, c7);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      __m256 alpha_vec <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_set1_ps</span>(alpha);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      __m256 C0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">6</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>      __m256 C7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_loadu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      C0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c0, alpha_vec, C0);
+</span></span><span style="display:flex;"><span>      C1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c1, alpha_vec, C1);
+</span></span><span style="display:flex;"><span>      C2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c2, alpha_vec, C2);
+</span></span><span style="display:flex;"><span>      C3 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c3, alpha_vec, C3);
+</span></span><span style="display:flex;"><span>      C4 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c4, alpha_vec, C4);
+</span></span><span style="display:flex;"><span>      C5 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c5, alpha_vec, C5);
+</span></span><span style="display:flex;"><span>      C6 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c6, alpha_vec, C6);
+</span></span><span style="display:flex;"><span>      C7 <span style="color:#f92672">=</span> <span style="color:#a6e22e">_mm256_fmadd_ps</span>(c7, alpha_vec, C7);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e">// Write
+</span></span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">0</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C0);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C1);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C2);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C3);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C4);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">5</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C5);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">6</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C6);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">_mm256_storeu_ps</span>(<span style="color:#f92672">&amp;</span>C[(i <span style="color:#f92672">+</span> <span style="color:#ae81ff">7</span>) <span style="color:#f92672">*</span> ldc <span style="color:#f92672">+</span> j], C7);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#define min(a, b) (((a) &lt; (b)) ? (a) : (b))
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">packA</span>(<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">int</span> tile_size_M, <span style="color:#66d9ef">int</span> tile_size_K, <span style="color:#66d9ef">int</span> i_begin, <span style="color:#66d9ef">int</span> k_begin, <span style="color:#66d9ef">int</span> i_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_A)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> tile_size_M; i <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> tile_size_K; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma omp simd
+</span></span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> ii <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; ii <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">8</span>; ii<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> global_i <span style="color:#f92672">=</span> i_begin <span style="color:#f92672">+</span> i <span style="color:#f92672">+</span> ii;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> global_k <span style="color:#f92672">=</span> k_begin <span style="color:#f92672">+</span> k;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (global_i <span style="color:#f92672">&lt;</span> M <span style="color:#f92672">&amp;&amp;</span> global_k <span style="color:#f92672">&lt;</span> K)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          packed_A[idx<span style="color:#f92672">++</span>] <span style="color:#f92672">=</span> A[(global_i <span style="color:#f92672">*</span> K) <span style="color:#f92672">+</span> global_k];
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          packed_A[idx<span style="color:#f92672">++</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0f</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">packB</span>(<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">int</span> tile_size_N, <span style="color:#66d9ef">int</span> tile_size_K, <span style="color:#66d9ef">int</span> j_begin, <span style="color:#66d9ef">int</span> k_begin, <span style="color:#66d9ef">int</span> j_end, <span style="color:#66d9ef">int</span> k_end, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_B)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> idx <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> tile_size_N; j <span style="color:#f92672">+=</span> <span style="color:#ae81ff">8</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> tile_size_K; k<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma omp simd
+</span></span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> jj <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; jj <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">8</span>; jj<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> global_k <span style="color:#f92672">=</span> k_begin <span style="color:#f92672">+</span> k;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> global_j <span style="color:#f92672">=</span> j_begin <span style="color:#f92672">+</span> j <span style="color:#f92672">+</span> jj;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (global_k <span style="color:#f92672">&lt;</span> K <span style="color:#f92672">&amp;&amp;</span> global_j <span style="color:#f92672">&lt;</span> N)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          packed_B[idx<span style="color:#f92672">++</span>] <span style="color:#f92672">=</span> B[(global_k <span style="color:#f92672">*</span> N) <span style="color:#f92672">+</span> global_j];
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          packed_B[idx<span style="color:#f92672">++</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.0f</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">gemm</span>(<span style="color:#66d9ef">int</span> M, <span style="color:#66d9ef">int</span> N, <span style="color:#66d9ef">int</span> K, <span style="color:#66d9ef">float</span> alpha, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>A, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>B, <span style="color:#66d9ef">float</span> beta, <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>C,
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> tile_size_M, <span style="color:#66d9ef">int</span> tile_size_N, <span style="color:#66d9ef">int</span> tile_size_K, <span style="color:#66d9ef">int</span> padded_N)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (beta <span style="color:#f92672">!=</span> <span style="color:#ae81ff">1.0f</span>)
+</span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M <span style="color:#f92672">*</span> padded_N; i<span style="color:#f92672">++</span>)
+</span></span><span style="display:flex;"><span>      C[i] <span style="color:#f92672">*=</span> beta;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_B <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">_mm_malloc</span>(<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>) <span style="color:#f92672">*</span> tile_size_N <span style="color:#f92672">*</span> tile_size_K, <span style="color:#ae81ff">32</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma omp parallel
+</span></span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>packed_A <span style="color:#f92672">=</span> (<span style="color:#66d9ef">float</span> <span style="color:#f92672">*</span>)<span style="color:#a6e22e">_mm_malloc</span>(<span style="color:#66d9ef">sizeof</span>(<span style="color:#66d9ef">float</span>) <span style="color:#f92672">*</span> tile_size_M <span style="color:#f92672">*</span> tile_size_K, <span style="color:#ae81ff">32</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> N; j <span style="color:#f92672">+=</span> tile_size_N)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; k <span style="color:#f92672">&lt;</span> K; k <span style="color:#f92672">+=</span> tile_size_K)
+</span></span><span style="display:flex;"><span>      {
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma omp single
+</span></span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> j_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(j <span style="color:#f92672">+</span> tile_size_N, N);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> k_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(k <span style="color:#f92672">+</span> tile_size_K, K);
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">packB</span>(B, tile_size_N, tile_size_K, j, k, j_end, k_end, K, N, packed_B);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#pragma omp for
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> M; i <span style="color:#f92672">+=</span> tile_size_M)
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> i_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(i <span style="color:#f92672">+</span> tile_size_M, M);
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">int</span> k_end <span style="color:#f92672">=</span> <span style="color:#a6e22e">min</span>(k <span style="color:#f92672">+</span> tile_size_K, K);
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">packA</span>(A, tile_size_M, tile_size_K, i, k, i_end, k_end, M, K, packed_A);
+</span></span><span style="display:flex;"><span>          <span style="color:#a6e22e">ukernel</span>(tile_size_K, tile_size_N, padded_N, tile_size_M, tile_size_N, tile_size_K, alpha, packed_A, packed_B, <span style="color:#f92672">&amp;</span>C[i <span style="color:#f92672">*</span> padded_N <span style="color:#f92672">+</span> j]);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">_mm_free</span>(packed_A);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">_mm_free</span>(packed_B);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>With this little optimizations we are able to reach 586 GFLOPs.</p>
+<h2 id="other-relevant-optimizations">Other relevant optimizations</h2>
+<p>There are many other optimizations to apply even in the context of CPU, GEMM is still a really complex operation. I would like to mention MMT4D which is the way the IREE compilers uses for GEMM <cite><sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></cite>. This approach uses a 4D approach where the two first dimensions are the tile index and the other two the element inside that tile, it also transposes B (That&rsquo;s the meaning of the T on MMT4D).</p>
+<p>Furthermore there are other optimizations that take into account the TLB which we completely ignore here a famous example is the GotoBLAS library (predecessor of OpenBLAS). This library was written by Kazushige Goto <cite><sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup></cite> and its a great example of a masterful implementation by someone who truly know the hardware well.</p>
+<h2 id="performance-comparison">Performance comparison</h2>
+<p>Lastly we compare all of our implementations relatively to OpenBLAS for some sample sizes</p>
+<p><img src="/images/cpuperf.png" alt="image"></p>
+<p>As seen in the image, on the best case we reach a 75% of the performance of OpenBLAS. We also observe how the bigger the size the more impact packing has.</p>
+<p>OpenBLAS remains way superior as it is the standard library, compiled from source for my own CPU and written by the biggest experts in the world, likely some of the code in OpenBLAS was even written in assembly to get all of the performance out of the hardware. Framing it that way a 75% doesn&rsquo;t sound that bad.</p>
+<p>In conclusion we showed how hard truly the GEMM problem is even for a CPU which is simpler hardware than todays GPUs or ASICs. I hope you found this article helpful!. All the code is available here <cite><sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup></cite></p>
+<!---
+ CITATIONS
+-->
+<p><em>Disclaimer</em>: No AI was used to write the contents of this post, this is fully original and my own personal opinion.</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p><a href="https://www.hpcwire.com/2026/04/28/china-unveils-2-exaflop-all-cpu-lineshine-supercomputer/">China Unveils 2 Exaflop, All-CPU ‘LineShine’ Supercomputer</a>&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p><a href="https://iree.dev/community/blog/2021-10-13-matrix-multiplication-with-mmt4d/#existing-matrix-multiplication-code-generation">Matrix Multiplication with MMT4D</a>&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p><a href="https://dl.acm.org/doi/10.1145/1356052.1356053">Anatomy of high-performance matrix multiplication</a>&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p><a href="https://github.com/Dasor/cpu-gemm">Source code</a>&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+          </article>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-12 col-lg-3">
+        <div id="stickySideBar" class="sticky-sidebar">
+          
+          <aside class="toc">
+              <h5>
+                Table Of Contents
+              </h5>
+              <div class="toc-content">
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#introduction-what-is-gemm">Introduction: What is GEMM?</a></li>
+    <li><a href="#why-the-cpu">Why the CPU?</a></li>
+    <li><a href="#considerations-before-starting">Considerations before starting</a></li>
+    <li><a href="#basic-kernel">Basic Kernel</a></li>
+    <li><a href="#tiling">Tiling</a></li>
+    <li><a href="#vectorization-with-intrinsics">Vectorization with Intrinsics</a></li>
+    <li><a href="#loop-unrolling">Loop Unrolling</a></li>
+    <li><a href="#more-aggressive-unrolling">More aggressive unrolling.</a></li>
+    <li><a href="#packing">Packing</a></li>
+    <li><a href="#improved-packing">Improved Packing</a></li>
+    <li><a href="#alignment-and-more-unrolling">Alignment and more Unrolling</a></li>
+    <li><a href="#other-relevant-optimizations">Other relevant optimizations</a></li>
+    <li><a href="#performance-comparison">Performance comparison</a></li>
+  </ul>
+</nav>
+              </div>
+          </aside>
+          
+
+          
+          <aside class="tags">
+            <h5>Tags</h5>
+            <ul class="tags-ul list-unstyled list-inline">
+              
+              
+              <li class="list-inline-item"><a href="/tags/cpu"
+                target="_blank"
+              >CPU</a></li>
+              
+              
+              <li class="list-inline-item"><a href="/tags/computer-architecture"
+                target="_blank"
+              >Computer Architecture</a></li>
+              
+              
+              <li class="list-inline-item"><a href="/tags/gemm"
+                target="_blank"
+              >GEMM</a></li>
+              
+            </ul>
+          </aside>
+          
+
+          
+          <aside class="social">
+            <h5>Social</h5>
+            <div class="social-content">
+              <ul class="list-inline">
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://www.linkedin.com/feed/?shareActive=true&text= http%3a%2f%2flocalhost%3a1313%2fblogs%2fcpu-gemm%2f">
+                    <i class="fab fa-linkedin"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='https://twitter.com/share?text=Optimizing%20CPU%20GEMM%20step%20by%20step.&url=http%3a%2f%2flocalhost%3a1313%2fblogs%2fcpu-gemm%2f&hashtags=CPU%2cComputer%20Architecture%2cGEMM'>
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href="https://api.whatsapp.com/send?text=Optimizing%20CPU%20GEMM%20step%20by%20step.: http%3a%2f%2flocalhost%3a1313%2fblogs%2fcpu-gemm%2f">
+                    <i class="fab fa-whatsapp"></i>
+                  </a>
+                </li>
+                <li class="list-inline-item text-center">
+                  <a target="_blank" href='mailto:?subject=Optimizing%20CPU%20GEMM%20step%20by%20step.&amp;body=Check%20out%20this%20site http%3a%2f%2flocalhost%3a1313%2fblogs%2fcpu-gemm%2f'>
+                    <i class="fa fa-envelope"></i>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </aside>
+          
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-12 col-lg-9 p-4">
+        
+      </div>
+    </div>
+  </div>
+  <button class="p-2 px-3" onclick="topFunction()" id="topScroll">
+    <i class="fas fa-angle-up"></i>
+  </button>
+</section>
+
+
+<div class="progress">
+  <div id="scroll-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+<Script src="/js/scrollProgressBar.js"></script>
+
+
+<script>
+  var topScroll = document.getElementById("topScroll");
+  window.onscroll = function() {scrollFunction()};
+
+  function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      topScroll.style.display = "block";
+    } else {
+      topScroll.style.display = "none";
+    }
+  }
+
+  function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  }
+
+  
+  let stickySideBarElem = document.getElementById("stickySideBar");
+  let stickyNavBar =  true ;
+  if(stickyNavBar) {
+    let headerElem = document.getElementById("profileHeader");
+    let headerHeight = headerElem.offsetHeight + 15;
+    stickySideBarElem.style.top = headerHeight + "px";
+  } else {
+    stickySideBarElem.style.top = "50px";
+  }
+</script>
+
+
+<script src="/js/readingTime.js"></script>
+
+
+
+  </div><footer>
+    
+
+
+  
+
+ 
+ 
+<div class="container py-3" id="recent-posts">
+    
+    
+    <div class="h3 text-center text-secondary py-3">
+        Recent Posts
+    </div>
+    <div class="row justify-content-center">
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/cpu-gemm/">
+                        <img src="/images/CPU_GEMM_Cover.png" class="card-img-top" alt="Optimizing CPU GEMM step by step.">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/cpu-gemm/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="Optimizing CPU GEMM step by step.">Optimizing CPU GEMM step …</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><h2 id="introduction-what-is-gemm">Introduction: What is GEMM?</h2>
+<p>Let&rsquo;s first define what a GEMM is and why it is relevant in today&rsquo;s world. GEMM refers to <strong>General Matrix Multiplication</strong>, a linear algebra operation that can be defined as:</p>
+<p>$$ C = \alpha AB + \beta C $$</p>
+<p>Where A, B and C are matrices and alpha and beta are …</p></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">April 1, 2026</span>
+                    <a href="/blogs/cpu-gemm/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 col-md-6 pt-2">
+            <div class="card h-100">
+                
+                <div class="card-header">
+                    <a href="/blogs/rooting/">
+                        <img src="/images/rooting.png" class="card-img-top" alt="Why you should Root your phone (and other things)">
+                    </a>
+                </div>
+                
+                <div class="card-body bg-transparent p-3 shadow-sm">
+                    <a href="/blogs/rooting/" class="primary-font card-title">
+                        <h5 class="card-title bg-transparent" title="Why you should Root your phone (and other things)">Why you should Root your …</h5>
+                    </a>
+                    <div class="card-text secondary-font">
+                        <p><h2 id="what-is-rooting">What is rooting?</h2>
+<p>If you know what rooting is, you can safely skip this section. I will just briefly explain in simple terms what rooting is. If you kept reading I guess you are not much of a power user so let me give you an example using Windows as an analogy. I&rsquo;m sure at some point you have …</p></p>
+                    </div>
+                </div>
+                <div class="mt-auto card-footer">
+                    <span class="float-start">April 1, 2026</span>
+                    <a href="/blogs/rooting/" class="float-end btn btn-outline-info btn-sm">Read</a>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<div class="text-center pt-2">
+    
+    <span class="px-1">
+        <a href="https://github.com/Dasor" target="_blank" aria-label="github">
+            <svg xmlns="http://www.w3.org/2000/svg" width="2.7em" height="2.7em" viewBox="0 0 1792 1792">
+                <path id="footer-socialNetworks-github-svg-path"
+                    d="M522 1352q-8 9-20-3-13-11-4-19 8-9 20 3 12 11 4 19zm-42-61q9 12 0 19-8 6-17-7t0-18q9-7 17 6zm-61-60q-5 7-13 2-10-5-7-12 3-5 13-2 10 5 7 12zm31 34q-6 7-16-3-9-11-2-16 6-6 16 3 9 11 2 16zm129 112q-4 12-19 6-17-4-13-15t19-7q16 5 13 16zm63 5q0 11-16 11-17 2-17-11 0-11 16-11 17-2 17 11zm58-10q2 10-14 14t-18-8 14-15q16-2 18 9zm964-956v960q0 119-84.5 203.5t-203.5 84.5h-224q-16 0-24.5-1t-19.5-5-16-14.5-5-27.5v-239q0-97-52-142 57-6 102.5-18t94-39 81-66.5 53-105 20.5-150.5q0-121-79-206 37-91-8-204-28-9-81 11t-92 44l-38 24q-93-26-192-26t-192 26q-16-11-42.5-27t-83.5-38.5-86-13.5q-44 113-7 204-79 85-79 206 0 85 20.5 150t52.5 105 80.5 67 94 39 102.5 18q-40 36-49 103-21 10-45 15t-57 5-65.5-21.5-55.5-62.5q-19-32-48.5-52t-49.5-24l-20-3q-21 0-29 4.5t-5 11.5 9 14 13 12l7 5q22 10 43.5 38t31.5 51l10 23q13 38 44 61.5t67 30 69.5 7 55.5-3.5l23-4q0 38 .5 103t.5 68q0 22-11 33.5t-22 13-33 1.5h-224q-119 0-203.5-84.5t-84.5-203.5v-960q0-119 84.5-203.5t203.5-84.5h960q119 0 203.5 84.5t84.5 203.5z" />
+
+                <metadata>
+                    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                        xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+                        <rdf:Description about="https://iconscout.com/legal#licenses"
+                            dc:title="Github, Online, Project, Hosting, Square"
+                            dc:description="Github, Online, Project, Hosting, Square" dc:publisher="Iconscout"
+                            dc:date="2016-12-14" dc:format="image/svg+xml" dc:language="en">
+                            <dc:creator>
+                                <rdf:Bag>
+                                    <rdf:li>Font Awesome</rdf:li>
+                                </rdf:Bag>
+                            </dc:creator>
+                        </rdf:Description>
+                    </rdf:RDF>
+                </metadata>
+            </svg>
+        </a>
+    </span>
+    
+
+    
+    <span class="px-1">
+        <a href="https://linkedin.com/in/dams2" target="_blank" aria-label="linkedin">
+            <svg xmlns="http://www.w3.org/2000/svg" width='2.4em' height='2.4em' fill="#fff" aria-label="LinkedIn"
+                viewBox="0 0 512 512">
+                <rect width="512" height="512" fill="#0077b5" rx="15%" />
+                <circle cx="142" cy="138" r="37" />
+                <path stroke="#fff" stroke-width="66" d="M244 194v198M142 194v198" />
+                <path d="M276 282c0-20 13-40 36-40 24 0 33 18 33 45v105h66V279c0-61-32-89-76-89-34 0-51 19-59 32" />
+            </svg>
+        </a>
+    </span>
+    
+
+    
+
+    
+
+    
+</div><div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-4 text-center">
+            
+                <div class="pb-2">
+                    <a href="http://localhost:1313/" title="Daniel&#39;s blog">
+                        <img alt="Footer logo" src="https://avatars.githubusercontent.com/u/36473771?v=4"
+                            height="40px" width="40px">
+                    </a>
+                </div>
+            
+            &copy; 2026  All rights reserved
+            <div class="text-secondary">
+                Made with
+                <span class="text-danger">
+                    &#10084;
+                </span>
+                and
+                <a href="https://github.com/gurusabarish/hugo-profile" target="_blank"
+                    title="Designed and developed by gurusabarish">
+                    Hugo Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</footer><script src="/bootstrap-5/js/bootstrap.bundle.min.js"></script>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+        document.documentElement.classList.remove('dark');
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+    }
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            document.documentElement.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+
+</script>
+
+
+    <script>
+      
+      window.searchIndexURL = "/index.json";
+    </script>
+    <script src="/js/search.js"></script>
+
+
+
+
+
+<!-- MathJax -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js" integrity="sha384-M5jmNxKC9EVnuqeMwRHvFuYUE8Hhp0TgBruj/GZRkYtiMrCRgH7yvv5KY+Owi7TW" crossorigin="anonymous"></script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\[','\]']],
+        processEscapes: true,
+        processEnvironments: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        TeX: { equationNumbers: { autoNumber: "AMS" },
+             extensions: ["AMSmath.js", "AMSsymbols.js"] }
+      }
+    });
+</script>
+
+
+
+
+
+
+
+
+  <section id="search-content" class="py-2">
+    <div class="container" id="search-results"></div>
+  </section>
+</body>
+
+</html>
