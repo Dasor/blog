@@ -352,7 +352,7 @@ Donations | Daniel&#39;s blog
                 
                 <div class="card-header">
                     <a href="/blogs/cpu-gemm/">
-                        <img src="/images/rooting.png" class="card-img-top" alt="Optimizing CPU GEMM step by step.">
+                        <img src="/images/CPU_GEMM_Cover.png" class="card-img-top" alt="Optimizing CPU GEMM step by step.">
                     </a>
                 </div>
                 
@@ -362,9 +362,9 @@ Donations | Daniel&#39;s blog
                     </a>
                     <div class="card-text secondary-font">
                         <p><h2 id="introduction-what-is-gemm">Introduction: What is GEMM?</h2>
-<p>Lets first define what a GEMM is and why it is relevant in today&rsquo;s world. GEMM refers to <strong>General Matrix Multiplication</strong> a linear algebra operation that can be defined as:</p>
-<p>$C = \alpha AB + \beta C$</p>
-<p>Where A, B and C are matrices and alpha and beta scalars. Most of the …</p></p>
+<p>Let&rsquo;s first define what a GEMM is and why it is relevant in today&rsquo;s world. GEMM refers to <strong>General Matrix Multiplication</strong>, a linear algebra operation that can be defined as:</p>
+<p>$$ C = \alpha AB + \beta C $$</p>
+<p>Where A, B and C are matrices and alpha and beta are …</p></p>
                     </div>
                 </div>
                 <div class="mt-auto card-footer">
@@ -518,6 +518,24 @@ Donations | Daniel&#39;s blog
 
 
 
+
+
+<!-- MathJax -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js" integrity="sha384-M5jmNxKC9EVnuqeMwRHvFuYUE8Hhp0TgBruj/GZRkYtiMrCRgH7yvv5KY+Owi7TW" crossorigin="anonymous"></script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\[','\]']],
+        processEscapes: true,
+        processEnvironments: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        TeX: { equationNumbers: { autoNumber: "AMS" },
+             extensions: ["AMSmath.js", "AMSsymbols.js"] }
+      }
+    });
+</script>
 
 
 
