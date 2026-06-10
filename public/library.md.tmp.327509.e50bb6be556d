@@ -1,0 +1,24 @@
+---
+title: "Library"
+layout: "library"
+date: 2026-06-09
+draft: false
+description: "Books I have read"
+categories:
+  - name: "Computer Science"
+    books:
+      - title: "Structure and Interpretation of Computer Programs"
+        author: "Abelson & Sussman"
+        favourite: true
+      - title: "The Linux Programming Interface"
+        author: "Michael Kerrisk"
+        favourite: false
+      - title: "Computer Organization and Design"
+        author: "Patterson & Hennessy"
+        favourite: true
+  - name: "Fiction"
+    books:
+      - title: "Dune"
+        author: "Frank Herbert"
+        favourite: true
+---

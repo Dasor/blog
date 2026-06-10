@@ -23,11 +23,28 @@ languages:
           title: Blog posts
           url: /blogs
           weight: 1
+        - identifier: about
+          name: About
+          title: About Me
+          url: /#about
+          weight: 2
+        - identifier: paintings
+          name: Favourite Paintings
+          title: Favourite Paintings
+          url: /paintings
+          parent: about
+          weight: 1
+        - identifier: library
+          name: Library
+          title: Library
+          url: /library
+          parent: about
+          weight: 2
         - identifier: donations
           name: Donations
           title: Donations
           url: /donations
-          weight: 2
+          weight: 3
 outputs:
   home:
     - "HTML"

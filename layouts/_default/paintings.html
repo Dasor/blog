@@ -1,0 +1,37 @@
+{{ define "head" }}
+<meta name="description" content="{{ .Params.description }}">
+<link rel="stylesheet" href="{{ (printf "%scss/single.css" (.Site.Params.staticPath | default "")) | relURL }}">
+{{ end }}
+
+{{ define "title" }}
+{{.Title }} | {{ .Site.Title }}
+{{ end }}
+
+{{ define "main" }}
+<section id="single">
+  <div class="container py-4">
+    <div class="title mb-5">
+      <h1 class="text-center mb-2">{{ .Title }}</h1>
+      {{ if .Params.description }}
+      <p class="text-center text-muted">{{ .Params.description }}</p>
+      {{ end }}
+    </div>
+
+    {{ range $i, $p := .Params.paintings }}
+    <div class="row align-items-center mb-5 pb-4 {{ if eq (mod $i 2) 1 }}flex-row-reverse{{ end }}">
+      <div class="col-sm-12 col-md-5 mb-3 mb-md-0">
+        <img src="{{ $p.src }}" alt="{{ $p.title | default $p.artist }}" class="img-fluid rounded shadow">
+      </div>
+      <div class="col-sm-12 col-md-7 px-md-5">
+        {{ if $p.title }}<h4 class="mb-1">{{ $p.title }}</h4>{{ end }}
+        <p class="text-muted mb-3"><em>{{ $p.artist }}</em></p>
+        <p>{{ $p.description }}</p>
+      </div>
+    </div>
+    {{ if lt (add $i 1) (len $.Params.paintings) }}
+    <hr class="mb-5">
+    {{ end }}
+    {{ end }}
+  </div>
+</section>
+{{ end }}

@@ -1,0 +1,62 @@
+{{ define "head" }}
+<meta name="description" content="{{ .Params.description }}">
+<link rel="stylesheet" href="{{ (printf "%scss/single.css" (.Site.Params.staticPath | default "")) | relURL }}">
+<style>
+  .library-table { color: var(--text-color); }
+  .library-table thead th {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border-color: var(--secondary-color);
+  }
+  .library-table tbody tr { background-color: var(--background-color); }
+  .library-table tbody td { border-color: var(--secondary-color); }
+  .library-table tbody tr:hover td {
+    background-color: var(--secondary-background-color);
+    color: var(--text-color);
+  }
+</style>
+{{ end }}
+
+{{ define "title" }}
+{{.Title }} | {{ .Site.Title }}
+{{ end }}
+
+{{ define "main" }}
+<section id="single">
+  <div class="container">
+    <div class="title mb-5">
+      <h1 class="text-center mb-2">{{ .Title }}</h1>
+      {{ if .Params.description }}
+      <p class="text-center text-muted">{{ .Params.description }}</p>
+      {{ end }}
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-10 col-lg-8">
+        {{ range .Params.categories }}
+        <h3 class="mb-3 mt-4">{{ .name }}</h3>
+        <table class="library-table table table-hover mb-5">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Title</th>
+              <th scope="col">Author</th>
+              <th scope="col">⭐</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ range $i, $book := .books }}
+            <tr>
+              <td>{{ add $i 1 }}</td>
+              <td>{{ $book.title }}</td>
+              <td>{{ $book.author }}</td>
+              <td>{{ if $book.favourite }}⭐{{ end }}</td>
+            </tr>
+            {{ end }}
+          </tbody>
+        </table>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+</section>
+{{ end }}
