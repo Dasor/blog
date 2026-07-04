@@ -369,5 +369,5 @@ params:
     articleList: "Jan 2, 2006"
     articleRecent: "Jan 2, 2006"
 
-  #customScripts: -| # You can add custom scripts which will be added before </body> tag
-  #  <script type="text/javascript"><!-- any script here --></script>
+  customScripts: |
+    <script src="https://keepandroidopen.org/banner.js?size=minimal&animation=off"></script>
