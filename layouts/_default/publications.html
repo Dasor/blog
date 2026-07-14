@@ -1,0 +1,56 @@
+{{ define "head" }}
+<meta name="description" content="{{ .Params.description }}">
+<link rel="stylesheet" href="{{ (printf "%scss/single.css" (.Site.Params.staticPath | default "")) | relURL }}">
+<style>
+  .publications-list {
+    list-style: none;
+    padding-left: 0;
+  }
+  .publications-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.5em;
+    padding: 0.5em 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  .publications-list li:first-child {
+    padding-top: 0;
+  }
+  .publications-list .publication-date {
+    color: #888;
+    font-size: 0.9em;
+    white-space: nowrap;
+  }
+</style>
+{{ end }}
+
+{{ define "title" }}
+{{ .Title }} | {{ .Site.Title }}
+{{ end }}
+
+{{ define "main" }}
+<section id="single">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-sm-12 col-md-12 col-lg-9">
+        <div class="pr-lg-4">
+          <div class="title mb-5">
+            <h1 class="text-center mb-4">{{ .Title }}</h1>
+          </div>
+          <article class="page-content p-2">
+            <ul class="publications-list">
+              {{ range .Params.publications }}
+              <li>
+                <a href="{{ .link }}">{{ .title }}</a>
+                {{ if .date }}<span class="publication-date">{{ .date }}</span>{{ end }}
+              </li>
+              {{ end }}
+            </ul>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{{ end }}

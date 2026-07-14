@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
 		<title>Tags on Daniel&#39;s blog</title>
-		<link>http://localhost:1313/tags/</link>
+		<link>https://hugo-profile.netlify.app/tags/</link>
 		<description>Recent content in Tags on Daniel&#39;s blog</description>
 		<generator>Hugo</generator>
 		<language>en-us</language>
@@ -12,96 +12,96 @@
 		
 			<lastBuildDate>Sat, 30 May 2026 11:12:03 +0200</lastBuildDate>
 		
-			<atom:link href="http://localhost:1313/tags/index.xml" rel="self" type="application/rss+xml" />
+			<atom:link href="https://hugo-profile.netlify.app/tags/index.xml" rel="self" type="application/rss+xml" />
 			<item>
 				<title>Computer Architecture</title>
-				<link>http://localhost:1313/tags/computer-architecture/</link>
+				<link>https://hugo-profile.netlify.app/tags/computer-architecture/</link>
 				<pubDate>Sat, 30 May 2026 11:12:03 +0200</pubDate>
-				<guid>http://localhost:1313/tags/computer-architecture/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/computer-architecture/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>CPU</title>
-				<link>http://localhost:1313/tags/cpu/</link>
+				<link>https://hugo-profile.netlify.app/tags/cpu/</link>
 				<pubDate>Sat, 30 May 2026 11:12:03 +0200</pubDate>
-				<guid>http://localhost:1313/tags/cpu/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/cpu/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>GEMM</title>
-				<link>http://localhost:1313/tags/gemm/</link>
+				<link>https://hugo-profile.netlify.app/tags/gemm/</link>
 				<pubDate>Sat, 30 May 2026 11:12:03 +0200</pubDate>
-				<guid>http://localhost:1313/tags/gemm/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/gemm/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Android</title>
-				<link>http://localhost:1313/tags/android/</link>
+				<link>https://hugo-profile.netlify.app/tags/android/</link>
 				<pubDate>Wed, 01 Apr 2026 11:12:03 +0200</pubDate>
-				<guid>http://localhost:1313/tags/android/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/android/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Hacking</title>
-				<link>http://localhost:1313/tags/hacking/</link>
+				<link>https://hugo-profile.netlify.app/tags/hacking/</link>
 				<pubDate>Wed, 01 Apr 2026 11:12:03 +0200</pubDate>
-				<guid>http://localhost:1313/tags/hacking/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/hacking/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Low Level</title>
-				<link>http://localhost:1313/tags/low-level/</link>
+				<link>https://hugo-profile.netlify.app/tags/low-level/</link>
 				<pubDate>Wed, 01 Apr 2026 11:12:03 +0200</pubDate>
-				<guid>http://localhost:1313/tags/low-level/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/low-level/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Ejemplo</title>
-				<link>http://localhost:1313/tags/ejemplo/</link>
+				<link>https://hugo-profile.netlify.app/tags/ejemplo/</link>
 				<pubDate>Fri, 09 Dec 2022 19:53:33 +0530</pubDate>
-				<guid>http://localhost:1313/tags/ejemplo/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/ejemplo/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Mathjax</title>
-				<link>http://localhost:1313/tags/mathjax/</link>
+				<link>https://hugo-profile.netlify.app/tags/mathjax/</link>
 				<pubDate>Fri, 09 Dec 2022 19:53:33 +0530</pubDate>
-				<guid>http://localhost:1313/tags/mathjax/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/mathjax/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Sintaxis De Markdown</title>
-				<link>http://localhost:1313/tags/sintaxis-de-markdown/</link>
+				<link>https://hugo-profile.netlify.app/tags/sintaxis-de-markdown/</link>
 				<pubDate>Fri, 09 Dec 2022 19:53:33 +0530</pubDate>
-				<guid>http://localhost:1313/tags/sintaxis-de-markdown/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/sintaxis-de-markdown/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Muestra</title>
-				<link>http://localhost:1313/tags/muestra/</link>
+				<link>https://hugo-profile.netlify.app/tags/muestra/</link>
 				<pubDate>Sat, 03 Apr 2021 23:29:21 +0530</pubDate>
-				<guid>http://localhost:1313/tags/muestra/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/muestra/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Soporte De Emoji</title>
-				<link>http://localhost:1313/tags/soporte-de-emoji/</link>
+				<link>https://hugo-profile.netlify.app/tags/soporte-de-emoji/</link>
 				<pubDate>Sat, 03 Apr 2021 22:53:58 +0530</pubDate>
-				<guid>http://localhost:1313/tags/soporte-de-emoji/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/soporte-de-emoji/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Texto De Relleno</title>
-				<link>http://localhost:1313/tags/texto-de-relleno/</link>
+				<link>https://hugo-profile.netlify.app/tags/texto-de-relleno/</link>
 				<pubDate>Sat, 03 Apr 2021 22:41:10 +0530</pubDate>
-				<guid>http://localhost:1313/tags/texto-de-relleno/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/texto-de-relleno/</guid>
 				<description></description>
 			</item>
 			<item>
 				<title>Contenido Enriquecido</title>
-				<link>http://localhost:1313/tags/contenido-enriquecido/</link>
+				<link>https://hugo-profile.netlify.app/tags/contenido-enriquecido/</link>
 				<pubDate>Sat, 03 Apr 2021 19:53:33 +0530</pubDate>
-				<guid>http://localhost:1313/tags/contenido-enriquecido/</guid>
+				<guid>https://hugo-profile.netlify.app/tags/contenido-enriquecido/</guid>
 				<description></description>
 			</item>
 	</channel>

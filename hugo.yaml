@@ -40,6 +40,12 @@ languages:
           url: /library
           parent: about
           weight: 2
+        - identifier: publications
+          name: Publications
+          title: Publications
+          url: /publications
+          parent: about
+          weight: 3
         - identifier: donations
           name: Donations
           title: Donations
